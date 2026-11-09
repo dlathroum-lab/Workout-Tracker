@@ -1,1146 +1,388 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IronTrack 40+ Pro Split Tracker</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Phosphor Icons for Gym UX -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#ecfdf5',
-              400: '#34d399',
-              500: '#10b981',
-              600: '#059669',
-            },
-            accent: {
-              amber: '#f59e0b',
-              orange: '#f97316',
-              rose: '#f43f5e',
-              cyan: '#06b6d4',
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <title>IronTrack 40+ Elite</title>
+  
+  <!-- Mobile & PWA App Configuration -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IronTrack">
+  <meta name="theme-color" content="#0d1117">
+
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22IronTrack%2040%2B%20Elite%22%2C%22short_name%22%3A%22IronTrack%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d1117%22%2C%22theme_color%22%3A%22%230d1117%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2720%27%20fill%3D%27%230d1117%27%2F%3E%3Cpath%20d%3D%27M30%2035%20h10%20v30%20h-10%20z%20M60%2035%20h10%20v30%20h-10%20z%20M40%2047%20h20%20v6%20h-20%20z%27%20fill%3D%27%2338d39f%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+
   <style>
-    /* Mobile-first touch optimizations */
-    body {
-      touch-action: manipulation;
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent: #2ea043;
+      --accent-bright: #38d39f;
+      --superset-tag: #d29922;
+      --danger: #f85149;
+      --timer-bg: #21262d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    input[type="number"] {
-      -moz-appearance: textfield;
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding-bottom: 90px;
+      user-select: none;
     }
-    input[type="number"]::-webkit-inner-spin-button, 
-    input[type="number"]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
+
+    /* Fixed Top App Bar */
+    header {
+      position: sticky;
+      top: 0;
+      background: rgba(13, 17, 23, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 100;
+      padding: 12px 16px;
     }
-    .custom-scrollbar::-webkit-scrollbar {
-      display: none;
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
     }
-    .custom-scrollbar {
-      -ms-overflow-style: none;
+
+    .app-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-40 {
+      background: #238636;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .session-clock {
+      font-size: 0.85rem;
+      color: var(--accent-bright);
+      font-weight: 700;
+      background: var(--card-bg);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+    }
+
+    /* Horizontal Day Switcher */
+    .day-selector {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
       scrollbar-width: none;
     }
-    @keyframes pulse-subtle {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+    .day-selector::-webkit-scrollbar { display: none; }
+
+    .day-btn {
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
-    .timer-pulsing {
-      animation: pulse-subtle 1.5s infinite ease-in-out;
+
+    .day-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Content Area */
+    main {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .workout-meta {
+      margin-bottom: 16px;
+    }
+
+    .workout-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .workout-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* Exercise Cards */
+    .exercise-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      padding: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .group-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .tag-primary { background: #1f6feb; color: #fff; }
+    .tag-superset { background: var(--superset-tag); color: #000; }
+
+    .ex-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .ex-params {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .ex-notes {
+      font-size: 0.75rem;
+      color: #58a6ff;
+      margin-top: 6px;
+      background: rgba(56, 139, 253, 0.1);
+      padding: 6px 8px;
+      border-radius: 6px;
+    }
+
+    /* Sets Table */
+    .sets-container {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .set-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 1fr 48px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .set-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      background: #0d1117;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 8px;
+      text-align: center;
+      outline: none;
+    }
+
+    .input-wrapper input:focus {
+      border-color: #58a6ff;
+    }
+
+    .input-wrapper span {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .check-btn {
+      width: 44px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: #21262d;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .check-btn.completed {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Rest Timer Floating Bar */
+    .timer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(22, 27, 34, 0.98);
+      border-top: 1px solid var(--card-border);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .timer-display {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .timer-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent-bright);
+    }
+
+    .timer-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .timer-presets {
+      display: flex;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      background: var(--timer-bg);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .preset-btn.cancel {
+      background: rgba(248, 81, 73, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* Off-Day Screen */
+    .rest-screen {
+      text-align: center;
+      padding: 40px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+    }
+    .rest-icon { font-size: 3rem; margin-bottom: 12px; }
+    .rest-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; }
+    .rest-p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+
+    /* Action Footer */
+    .action-row {
+      margin-top: 24px;
+      display: flex;
+      gap: 10px;
+    }
+    .action-btn {
+      flex: 1;
+      background: #21262d;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: center;
     }
   </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col pb-28 antialiased selection:bg-brand-500 selection:text-black">
+<body>
 
-  <!-- Top Fixed Header -->
-  <header class="sticky top-0 z-40 bg-zinc-900/95 backdrop-blur-md border-b border-zinc-800 px-4 py-2.5">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-sm border border-emerald-500/30">
-          <i class="ph-bold ph-barbell"></i>
-        </div>
-        <div>
-          <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-            IRONTRACK <span class="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">40+ Elite</span>
-          </h1>
-        </div>
+  <header>
+    <div class="top-row">
+      <div class="app-title">
+        <span>🏋️ IRONTRACK</span>
+        <span class="badge-40">40+ ELITE</span>
       </div>
-      
-      <!-- Session Deadline / Clock Widget -->
-      <div class="flex items-center space-x-2">
-        <button id="sessionTimerToggle" onclick="toggleSessionCountdown()" class="flex items-center gap-1.5 text-xs bg-zinc-800/90 hover:bg-zinc-750 active:bg-zinc-700 px-2.5 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 transition-colors">
-          <i id="sessionTimerIcon" class="ph-bold ph-timer text-emerald-400"></i>
-          <span id="sessionTimerLabel" class="font-mono font-medium">50m Cap</span>
-        </button>
-        <button onclick="openHistoryModal()" class="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 flex items-center justify-center hover:text-white" title="Logs & History">
-          <i class="ph-bold ph-clock-counter-clockwise text-base"></i>
-        </button>
-      </div>
+      <div class="session-clock" id="sessionClock">50m Cap</div>
     </div>
-
-    <!-- Day Navigation Bar (Horizontal Scrollable) -->
-    <div class="flex space-x-1.5 mt-2.5 overflow-x-auto custom-scrollbar py-0.5" id="dayTabsContainer">
-      <!-- Generated via JS -->
-    </div>
+    <div class="day-selector" id="daySelector"></div>
   </header>
 
-  <!-- Workout Summary Banner for Selected Day -->
-  <section id="dayInfoBanner" class="px-4 py-3 bg-zinc-900/40 border-b border-zinc-850 flex items-center justify-between">
-    <div class="flex-1 pr-2">
-      <div class="flex items-center gap-2">
-        <h2 id="dayTitleText" class="text-base font-bold text-white tracking-tight">Push Hypertrophy</h2>
-        <span id="dayBadge" class="text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">50m Window</span>
-      </div>
-      <p id="dayNotesText" class="text-xs text-zinc-400 mt-0.5 truncate">Controlled 3s eccentrics • In/out by 6:20 AM</p>
+  <main id="mainContainer"></main>
+
+  <div class="timer-bar" id="timerBar">
+    <div class="timer-display">
+      <span class="timer-val" id="timerVal">00:00</span>
+      <span class="timer-label" id="timerStatus">REST TIMER</span>
     </div>
-    <div class="text-right">
-      <span id="dayCompletionStat" class="text-xs font-mono font-bold text-emerald-400">0/17 Sets</span>
-      <div class="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Done Today</div>
+    <div class="timer-presets">
+      <button class="preset-btn" onclick="startTimer(30)">30s</button>
+      <button class="preset-btn" onclick="startTimer(60)">60s</button>
+      <button class="preset-btn" onclick="startTimer(90)">90s</button>
+      <button class="preset-btn" onclick="startTimer(180)">3m</button>
+      <button class="preset-btn cancel" onclick="stopTimer()">✕</button>
     </div>
-  </section>
-
-  <!-- Rest Days Container (shown when selected day is rest) -->
-  <section id="restDayView" class="hidden flex-1 px-5 py-10 flex flex-col items-center justify-center text-center">
-    <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent-cyan text-3xl mb-4 shadow-inner">
-      <i id="restIcon" class="ph-bold ph-moon"></i>
-    </div>
-    <h3 id="restTitle" class="text-lg font-bold text-white">Full Recovery Day</h3>
-    <p id="restDescription" class="text-sm text-zinc-400 max-w-xs mt-2 leading-relaxed">
-      No lifting today. Prioritize hydration and high protein intake.
-    </p>
-    <div class="mt-6 p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 max-w-sm w-full text-left">
-      <h4 class="text-xs font-bold uppercase text-zinc-300 tracking-wider mb-2 flex items-center gap-1.5">
-        <i class="ph-fill ph-check-circle text-emerald-400"></i> Recovery Directives:
-      </h4>
-      <ul id="restDirectives" class="text-xs text-zinc-400 space-y-2 list-disc list-inside">
-        <li>Maintain fluid and electrolyte balance</li>
-        <li>Spinal decompression if feeling tight</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Main Workout View Container -->
-  <main id="workoutView" class="flex-1 px-3.5 py-4 space-y-4 max-w-md mx-auto w-full">
-    <!-- Exercises will be injected here -->
-  </main>
-
-  <!-- Session In-Progress Floater / Auto Rest Timer Banner -->
-  <div id="restTimerFloatingBar" class="fixed bottom-0 inset-x-0 bg-zinc-900/95 border-t border-zinc-800 backdrop-blur-lg px-4 py-3 z-30 transition-transform duration-300 shadow-2xl max-w-lg mx-auto">
-    <div class="flex items-center justify-between mb-2">
-      <div class="flex items-center space-x-2">
-        <div id="restTimerPulseDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-        <span class="text-xs uppercase font-bold tracking-wider text-zinc-400">Rest Timer</span>
-        <span id="activeTimerName" class="text-xs font-medium text-zinc-200 truncate max-w-[140px]">Next Set</span>
-      </div>
-      <div class="flex items-center space-x-2">
-        <span id="restTimerSeconds" class="text-xl font-mono font-bold text-emerald-400">00:00</span>
-        <button onclick="stopRestTimer()" class="text-zinc-500 hover:text-zinc-300 text-sm p-1 rounded">
-          <i class="ph-bold ph-x"></i>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Quick Rest Buttons -->
-    <div class="grid grid-cols-5 gap-1.5">
-      <button onclick="startRestTimer(30, '30s Rest')" class="py-1.5 bg-zinc-800 hover:bg-zinc-700 active:bg-emerald-600/30 text-xs font-mono font-medium rounded-lg border border-zinc-700/80 text-zinc-200">
-        30s
-      </button>
-      <button onclick="startRestTimer(45, '45s Rest')" class="py-1.5 bg-zinc-800 hover:bg-zinc-700 active:bg-emerald-600/30 text-xs font-mono font-medium rounded-lg border border-zinc-700/80 text-zinc-200">
-        45s
-      </button>
-      <button onclick="startRestTimer(60, '60s Rest')" class="py-1.5 bg-zinc-800 hover:bg-zinc-700 active:bg-emerald-600/30 text-xs font-mono font-medium rounded-lg border border-zinc-700/80 text-zinc-200">
-        60s
-      </button>
-      <button onclick="startRestTimer(90, '90s Rest')" class="py-1.5 bg-zinc-800 hover:bg-zinc-700 active:bg-emerald-600/30 text-xs font-mono font-medium rounded-lg border border-zinc-700/80 text-zinc-200">
-        90s
-      </button>
-      <button onclick="startRestTimer(180, '3m Heavy Rest')" class="py-1.5 bg-zinc-800 hover:bg-zinc-700 active:bg-emerald-600/30 text-xs font-mono font-medium rounded-lg border border-zinc-700/80 text-zinc-200">
-        180s
-      </button>
-    </div>
-  </div>
-
-  <!-- History & Overload Drawer Modal -->
-  <div id="historyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-zinc-900 border border-zinc-800 w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <i class="ph-bold ph-chart-line-up text-emerald-400 text-lg"></i>
-          <h3 class="font-bold text-white text-base">Progress & Log Management</h3>
-        </div>
-        <button onclick="closeHistoryModal()" class="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center">
-          <i class="ph-bold ph-x"></i>
-        </button>
-      </div>
-
-      <div class="p-5 overflow-y-auto space-y-5 text-sm custom-scrollbar">
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800">
-            <span class="text-zinc-500 text-xs uppercase font-medium">Logged Sets Total</span>
-            <div id="statTotalSets" class="text-xl font-bold font-mono text-emerald-400 mt-0.5">0</div>
-          </div>
-          <div class="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800">
-            <span class="text-zinc-500 text-xs uppercase font-medium">Split Adherence</span>
-            <div id="statActiveDay" class="text-xl font-bold text-white mt-0.5">Active</div>
-          </div>
-        </div>
-
-        <!-- Log Export & Backup -->
-        <div class="space-y-2">
-          <h4 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Data & Progression Log</h4>
-          <div class="flex gap-2">
-            <button onclick="copyWorkoutSummary()" class="flex-1 py-2.5 px-3 bg-zinc-800 hover:bg-zinc-750 active:bg-zinc-700 text-zinc-200 rounded-xl border border-zinc-700 font-medium text-xs flex items-center justify-center gap-1.5">
-              <i class="ph-bold ph-copy"></i> Copy Log to Clipboard
-            </button>
-            <button onclick="exportJSONBackup()" class="flex-1 py-2.5 px-3 bg-zinc-800 hover:bg-zinc-750 active:bg-zinc-700 text-zinc-200 rounded-xl border border-zinc-700 font-medium text-xs flex items-center justify-center gap-1.5">
-              <i class="ph-bold ph-download-simple"></i> Backup JSON
-            </button>
-          </div>
-          <button onclick="resetCurrentDayData()" class="w-full py-2 px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/30 text-xs font-medium flex items-center justify-center gap-1.5">
-            <i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Checked Sets For Today
-          </button>
-        </div>
-
-        <!-- Previous Weights Quick Reference for selected exercise -->
-        <div class="space-y-2">
-          <h4 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Recent Exercise PRs & Trends</h4>
-          <div id="previousLogsList" class="space-y-2 text-xs">
-            <div class="text-zinc-500 italic py-2">Log working sets to automatically compile overload history.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Notification Toast -->
-  <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 bg-zinc-800/95 text-white border border-zinc-700 px-4 py-2 rounded-xl text-xs font-medium shadow-2xl z-50 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2">
-    <i id="toastIcon" class="ph-bold ph-check text-emerald-400"></i>
-    <span id="toastMsg">Logged successfully</span>
   </div>
 
   <script>
-    // --- PROGRAM DATA DEFINITION ---
-    const PROGRAM_DATA = [
-      {
-        id: "mon",
-        dayIndex: 1, // Monday
-        name: "Monday",
-        type: "workout",
-        title: "Push Hypertrophy",
-        windowBadge: "50m Cap (5:30-6:20 AM)",
-        notes: "3s eccentric tempo • Single cable station lock • High mechanical tension",
-        targetDurationMinutes: 50,
-        exercises: [
-          {
-            id: "mon_ex1",
-            name: "Low-Incline DB Bench Press",
-            stationGroup: "Primary Compound (Dumbbells)",
-            targetSets: 4,
-            targetReps: "8–10",
-            restSec: 60,
-            notes: "30° incline, semi-neutral grip, 3-sec negative",
-          },
-          {
-            id: "mon_ex2_a1",
-            name: "Cable Chest Press-Arounds / Flyes",
-            stationGroup: "Superset A (Cable Tower)",
-            supersetLabel: "Superset A1",
-            targetSets: 3,
-            targetReps: "12",
-            restSec: 30,
-            notes: "2-sec deep stretch pause, smooth peak contraction",
-          },
-          {
-            id: "mon_ex2_a2",
-            name: "Standing Cable Lateral Raises",
-            stationGroup: "Superset A (Cable Tower)",
-            supersetLabel: "Superset A2",
-            targetSets: 3,
-            targetReps: "12–15",
-            restSec: 30,
-            notes: "Lead with elbows, constant tension at the bottom",
-          },
-          {
-            id: "mon_ex3_b1",
-            name: "Seated DB Arnold Press",
-            stationGroup: "Superset B (Dumbbell / Cable)",
-            supersetLabel: "Superset B1",
-            targetSets: 3,
-            targetReps: "10–12",
-            restSec: 30,
-            notes: "Smooth rotation, don't bang weights at the top",
-          },
-          {
-            id: "mon_ex3_b2",
-            name: "Cross-Body Cable Triceps Extension",
-            stationGroup: "Superset B (Dumbbell / Cable)",
-            supersetLabel: "Superset B2",
-            targetSets: 3,
-            targetReps: "12–15",
-            restSec: 30,
-            notes: "Dual cables across torso, saves elbow connective tissue",
-          },
-          {
-            id: "mon_finisher",
-            name: "Push-Ups to Mechanical Failure",
-            stationGroup: "Finisher (Time Permitting)",
-            targetSets: 1,
-            targetReps: "AMRAP",
-            restSec: 0,
-            notes: "Strict form, pause on the chest if time permits",
-          }
-        ]
-      },
-      {
-        id: "tue",
-        dayIndex: 2, // Tuesday
-        name: "Tuesday",
-        type: "workout",
-        title: "Legs Hypertrophy",
-        windowBadge: "50m Cap (5:30-6:20 AM)",
-        notes: "Zero heavy spinal compression • Machine based • Out before Wednesday late night",
-        targetDurationMinutes: 50,
-        exercises: [
-          {
-            id: "tue_ex1",
-            name: "Hack Squat or 45° Leg Press",
-            stationGroup: "Primary Machine Compound",
-            targetSets: 4,
-            targetReps: "10–12",
-            restSec: 75,
-            notes: "Controlled 3-sec descent, maximum pain-free knee depth",
-          },
-          {
-            id: "tue_ex2_a1",
-            name: "Seated Leg Curls",
-            stationGroup: "Superset A (Pin-Loaded Machines)",
-            supersetLabel: "Superset A1",
-            targetSets: 4,
-            targetReps: "10–12",
-            restSec: 45,
-            notes: "Superior hamstring stretch position; 2s peak squeeze",
-          },
-          {
-            id: "tue_ex2_a2",
-            name: "Leg Extensions",
-            stationGroup: "Superset A (Pin-Loaded Machines)",
-            supersetLabel: "Superset A2",
-            targetSets: 4,
-            targetReps: "12–15",
-            restSec: 45,
-            notes: "Toes neutral, control the stack, quad burn",
-          },
-          {
-            id: "tue_ex3_b1",
-            name: "Dumbbell Romanian Deadlifts",
-            stationGroup: "Superset B (Dumbbells)",
-            supersetLabel: "Superset B1",
-            targetSets: 3,
-            targetReps: "10",
-            restSec: 30,
-            notes: "Soft knees, push hips straight back, protect low back",
-          },
-          {
-            id: "tue_ex3_b2",
-            name: "Standing Dumbbell Calf Raises",
-            stationGroup: "Superset B (Dumbbells)",
-            supersetLabel: "Superset B2",
-            targetSets: 3,
-            targetReps: "15",
-            restSec: 30,
-            notes: "Full 2-second dead stop stretch at bottom",
-          }
-        ]
-      },
-      {
-        id: "wed",
-        dayIndex: 3, // Wednesday
-        name: "Wednesday",
-        type: "rest",
-        title: "Full Rest / Late Night",
-        windowBadge: "Rest Day",
-        notes: "Rest day to protect recovery before evening schedule",
-        directives: [
-          "No heavy physical exertion; prioritize hydration",
-          "High protein nutrition leading into late evening commitments",
-          "Ensure extra water to counteract shorter sleep duration"
-        ]
-      },
-      {
-        id: "thu",
-        dayIndex: 4, // Thursday
-        name: "Thursday",
-        type: "rest",
-        title: "Spinal Decompression & Walk",
-        windowBadge: "Active Recovery",
-        notes: "Sleep in after late night • 30-45m brisk walk",
-        directives: [
-          "Sleep in past 5:30 AM to recover from Wednesday night",
-          "30–45 min brisk outdoor or incline treadmill walking",
-          "Flushes metabolite accumulation from Tuesday leg day without CNS cost",
-          "Light thoracic spine rotation and foam rolling optional"
-        ]
-      },
-      {
-        id: "fri",
-        dayIndex: 5, // Friday
-        name: "Friday",
-        type: "workout",
-        title: "Pull Hypertrophy",
-        windowBadge: "50m Cap (5:30-6:20 AM)",
-        notes: "Lat width & upper back density • Sparing lumbar spine for Sunday",
-        targetDurationMinutes: 50,
-        exercises: [
-          {
-            id: "fri_ex1",
-            name: "Neutral-Grip Lat Pulldowns",
-            stationGroup: "Primary Cable Vertical Pull",
-            targetSets: 4,
-            targetReps: "8–10",
-            restSec: 60,
-            notes: "Full overhead lat stretch, drive down through elbows",
-          },
-          {
-            id: "fri_ex2_a1",
-            name: "Chest-Supported DB or T-Bar Row",
-            stationGroup: "Superset A (Free Weight / Cable)",
-            supersetLabel: "Superset A1",
-            targetSets: 3,
-            targetReps: "8–10",
-            restSec: 30,
-            notes: "Chest glued to pad keeps lower back 100% safe",
-          },
-          {
-            id: "fri_ex2_a2",
-            name: "Cable Face Pulls (High Pulley)",
-            stationGroup: "Superset A (Free Weight / Cable)",
-            supersetLabel: "Superset A2",
-            targetSets: 3,
-            targetReps: "15",
-            restSec: 30,
-            notes: "External rotation cue; pull rope hands past ears",
-          },
-          {
-            id: "fri_ex3_b1",
-            name: "45° Hyperextensions",
-            stationGroup: "Superset B (Posterior Chain & Arms)",
-            supersetLabel: "Superset B1",
-            targetSets: 3,
-            targetReps: "12–15",
-            restSec: 30,
-            notes: "Bodyweight or light plate hugged tight, glute focus",
-          },
-          {
-            id: "fri_ex3_b2",
-            name: "Incline Dumbbell Biceps Curls",
-            stationGroup: "Superset B (Posterior Chain & Arms)",
-            supersetLabel: "Superset B2",
-            targetSets: 3,
-            targetReps: "10–12",
-            restSec: 30,
-            notes: "Deep biceps tendon stretch, strict 3-sec eccentric",
-          }
-        ]
-      },
-      {
-        id: "sat",
-        dayIndex: 6, // Saturday
-        name: "Saturday",
-        type: "workout",
-        title: "Upper Strength (Neural)",
-        windowBadge: "65–70m Weekend Runway",
-        notes: "Heavy neural recruitment • 2.5–3m rest on compounds • Submaximal crisp speed",
-        targetDurationMinutes: 65,
-        exercises: [
-          {
-            id: "sat_ex1",
-            name: "Incline Barbell Bench Press",
-            stationGroup: "Primary Barbell Press",
-            targetSets: 4,
-            targetReps: "4–6",
-            restSec: 180,
-            notes: "Warm up thoroughly. Work at RPE 8. Do not grind.",
-          },
-          {
-            id: "sat_ex2",
-            name: "Pendlay Row or Heavy Seal Row",
-            stationGroup: "Primary Barbell Pull",
-            targetSets: 4,
-            targetReps: "5",
-            restSec: 150,
-            notes: "Dead stop off floor, explosive hip & lat drive",
-          },
-          {
-            id: "sat_ex3",
-            name: "Standing Barbell Overhead Press",
-            stationGroup: "Vertical Compound Press",
-            targetSets: 3,
-            targetReps: "5",
-            restSec: 150,
-            notes: "Tight glutes and brace, clean vertical bar path",
-          },
-          {
-            id: "sat_ex4",
-            name: "Weighted Neutral-Grip Pull-Ups",
-            stationGroup: "Vertical Strength Pull",
-            targetSets: 3,
-            targetReps: "6",
-            restSec: 120,
-            notes: "Strict pull; swap to bodyweight if elbows ache",
-          },
-          {
-            id: "sat_ex5_a1",
-            name: "Heavy Barbell / EZ Bar Curls",
-            stationGroup: "Arm Armor Superset",
-            supersetLabel: "Superset A1",
-            targetSets: 3,
-            targetReps: "8–10",
-            restSec: 45,
-            notes: "Controlled cheat on concentric if needed, fight the negative",
-          },
-          {
-            id: "sat_ex5_a2",
-            name: "Overhead Cable Triceps Extensions",
-            stationGroup: "Arm Armor Superset",
-            supersetLabel: "Superset A2",
-            targetSets: 3,
-            targetReps: "10–12",
-            restSec: 45,
-            notes: "Long head triceps stretch with rope",
-          }
-        ]
-      },
-      {
-        id: "sun",
-        dayIndex: 0, // Sunday
-        name: "Sunday",
-        type: "workout",
-        title: "Lower Strength (Axial)",
-        windowBadge: "65–70m Weekend Runway",
-        notes: "Safety Squat Bar + Trap Bar • High CNS output • Pure posterior chain power",
-        targetDurationMinutes: 65,
-        exercises: [
-          {
-            id: "sun_ex1",
-            name: "SSB Squats or Front Squats",
-            stationGroup: "Primary Knee Dominant",
-            targetSets: 4,
-            targetReps: "4–5",
-            restSec: 180,
-            notes: "SSB preserves shoulders and keeps lumbar spine vertical",
-          },
-          {
-            id: "sun_ex2",
-            name: "Trap Bar Deadlift (High Handle)",
-            stationGroup: "Primary Hip Hinge",
-            targetSets: 3,
-            targetReps: "5",
-            restSec: 180,
-            notes: "Spares lumbar shear, aggressive leg press off floor",
-          },
-          {
-            id: "sun_ex3",
-            name: "Bulgarian Split Squats (DBs)",
-            stationGroup: "Unilateral Hypertrophy & Stability",
-            targetSets: 3,
-            targetReps: "6–8",
-            restSec: 90,
-            notes: "Per leg. Protects knee tracking and unlocks hip flexors",
-          },
-          {
-            id: "sun_ex4",
-            name: "Heavy Farmer's Walks (Trap Bar / DBs)",
-            stationGroup: "Loaded Carry & Grip",
-            targetSets: 3,
-            targetReps: "40 Yards",
-            restSec: 90,
-            notes: "Braced core, tall chest, crushed grip",
-          },
-          {
-            id: "sun_ex5",
-            name: "Hanging Leg / Knee Raises",
-            stationGroup: "Trunk Stability",
-            targetSets: 3,
-            targetReps: "12–15",
-            restSec: 60,
-            notes: "No swinging. Curl pelvis toward sternum at the top",
-          }
-        ]
-      }
-    ];
-
-    // State Variables
-    let currentSelectedDayId = "mon";
-    let userWorkoutLogs = {}; // Stored in localStorage
-    let restTimerInterval = null;
-    let restTimerRemainingSec = 0;
-    let sessionTimerInterval = null;
-    let sessionElapsedSeconds = 0;
-    let sessionIsRunning = false;
-
-    // Web Audio Chime Generator (No external MP3 required)
-    function playBeep(frequency = 880, duration = 0.15, count = 2) {
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
-        for (let i = 0; i < count; i++) {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(frequency, ctx.currentTime + (i * 0.2));
-          gain.gain.setValueAtTime(0.3, ctx.currentTime + (i * 0.2));
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (i * 0.2) + duration);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(ctx.currentTime + (i * 0.2));
-          osc.stop(ctx.currentTime + (i * 0.2) + duration);
-        }
-      } catch (e) {
-        console.warn("Audio autoplay blocked or unsupported:", e);
-      }
-    }
-
-    // Local Storage Helpers
-    const STORAGE_KEY = "irontrack_pro_logs_v1";
-
-    function loadSavedLogs() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          userWorkoutLogs = JSON.parse(raw);
-        }
-      } catch (e) {
-        console.error("Failed to load logs from storage", e);
-      }
-    }
-
-    function saveLogs() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(userWorkoutLogs));
-        updateCompletionStats();
-      } catch (e) {
-        console.error("Failed to save to storage", e);
-      }
-    }
-
-    // Initialize Default Day Based on Today's Day of Week
-    function getTodayProgramId() {
-      const dayOfWeek = new Date().getDay(); // 0 is Sunday, 1 is Monday...
-      const match = PROGRAM_DATA.find(d => d.dayIndex === dayOfWeek);
-      return match ? match.id : "mon";
-    }
-
-    // Render Navigation Tabs
-    function renderTabs() {
-      const container = document.getElementById("dayTabsContainer");
-      container.innerHTML = "";
-      
-      const currentDayOfWeek = new Date().getDay();
-
-      PROGRAM_DATA.forEach(day => {
-        const isSelected = day.id === currentSelectedDayId;
-        const isToday = day.dayIndex === currentDayOfWeek;
-        
-        const btn = document.createElement("button");
-        btn.onclick = () => selectDay(day.id);
-        
-        let tabClass = "flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ";
-        if (isSelected) {
-          tabClass += "bg-emerald-500 text-zinc-950 font-bold shadow-md shadow-emerald-500/20";
-        } else {
-          tabClass += "bg-zinc-850 hover:bg-zinc-800 text-zinc-300 border border-zinc-800";
-        }
-        
-        btn.className = tabClass;
-        
-        // Label
-        const shortName = day.name.substring(0, 3);
-        const iconHtml = day.type === "rest" 
-          ? `<i class="ph-bold ph-bed text-[11px] opacity-75"></i>` 
-          : `<i class="ph-bold ph-barbell text-[11px] opacity-75"></i>`;
-        
-        btn.innerHTML = `
-          ${iconHtml}
-          <span>${shortName}</span>
-          ${isToday ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-zinc-950' : 'bg-emerald-400'}"></span>` : ''}
-        `;
-        container.appendChild(btn);
-      });
-    }
-
-    // Select Day View
-    function selectDay(dayId) {
-      currentSelectedDayId = dayId;
-      renderTabs();
-      renderDayContent();
-    }
-
-    // Render Day Content (Workout or Rest)
-    function renderDayContent() {
-      const dayData = PROGRAM_DATA.find(d => d.id === currentSelectedDayId);
-      if (!dayData) return;
-
-      const restView = document.getElementById("restDayView");
-      const workoutView = document.getElementById("workoutView");
-      const titleText = document.getElementById("dayTitleText");
-      const badge = document.getElementById("dayBadge");
-      const notes = document.getElementById("dayNotesText");
-
-      titleText.textContent = dayData.title;
-      badge.textContent = dayData.windowBadge;
-      notes.textContent = dayData.notes;
-
-      if (dayData.type === "rest") {
-        workoutView.classList.add("hidden");
-        restView.classList.remove("hidden");
-        document.getElementById("restTitle").textContent = dayData.title;
-        document.getElementById("restIcon").className = dayData.id === "thu" ? "ph-bold ph-person-simple-walk" : "ph-bold ph-moon";
-        
-        const directivesList = document.getElementById("restDirectives");
-        directivesList.innerHTML = "";
-        dayData.directives.forEach(item => {
-          const li = document.createElement("li");
-          li.textContent = item;
-          directivesList.appendChild(li);
-        });
-        document.getElementById("dayCompletionStat").textContent = "REST";
-        return;
-      }
-
-      // If workout day
-      restView.classList.add("hidden");
-      workoutView.classList.remove("hidden");
-
-      workoutView.innerHTML = "";
-
-      dayData.exercises.forEach((ex, exIndex) => {
-        const card = document.createElement("div");
-        card.className = "bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 shadow-sm relative overflow-hidden";
-
-        // Superset / Station Badge
-        let supersetBadgeHtml = "";
-        if (ex.supersetLabel) {
-          supersetBadgeHtml = `
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/25">
-              ${ex.supersetLabel}
-            </span>
-          `;
-        }
-
-        // Previous performance lookup
-        const prevLogs = userWorkoutLogs[ex.id] || [];
-        let prevText = "No previous logged sets";
-        if (prevLogs.length > 0) {
-          const lastEntry = prevLogs[prevLogs.length - 1];
-          prevText = `Last: ${lastEntry.weight || '--'} lbs × ${lastEntry.reps || '--'} reps`;
-        }
-
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-2 mb-2">
-            <div>
-              <div class="flex items-center gap-1.5 mb-1">
-                ${supersetBadgeHtml}
-                <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">${ex.stationGroup}</span>
-              </div>
-              <h3 class="font-bold text-white text-base tracking-tight leading-snug">${ex.name}</h3>
-            </div>
-            <button onclick="startRestTimer(${ex.restSec}, '${ex.name}')" class="flex-shrink-0 text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded-lg border border-zinc-700 flex items-center gap-1">
-              <i class="ph-bold ph-clock"></i> ${ex.restSec}s
-            </button>
-          </div>
-
-          <div class="flex items-center justify-between text-xs text-zinc-400 mb-3 bg-zinc-950/60 p-2 rounded-xl border border-zinc-850">
-            <span>Target: <strong class="text-zinc-200">${ex.targetSets} sets × ${ex.targetReps}</strong></span>
-            <span class="text-zinc-500 text-[11px] truncate max-w-[160px]">${prevText}</span>
-          </div>
-
-          <p class="text-[11px] text-zinc-400 mb-3 italic flex items-center gap-1">
-            <i class="ph-fill ph-info text-zinc-500"></i> ${ex.notes}
-          </p>
-
-          <!-- Sets Table Header -->
-          <div class="grid grid-cols-12 gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider px-1 mb-1.5 text-center">
-            <div class="col-span-2 text-left">Set</div>
-            <div class="col-span-4">Lbs</div>
-            <div class="col-span-3">Reps</div>
-            <div class="col-span-3 text-right">Check</div>
-          </div>
-
-          <!-- Sets Rows Container -->
-          <div class="space-y-2" id="sets_container_${ex.id}">
-            ${renderSetRows(ex)}
-          </div>
-        `;
-
-        workoutView.appendChild(card);
-      });
-
-      updateCompletionStats();
-    }
-
-    // Render individual Set Rows for an exercise
-    function renderSetRows(exercise) {
-      let rowsHtml = "";
-      const loggedList = userWorkoutLogs[exercise.id] || [];
-
-      for (let s = 1; s <= exercise.targetSets; s++) {
-        const savedSet = loggedList[s - 1] || { weight: "", reps: "", completed: false };
-        const isCompleted = savedSet.completed;
-
-        rowsHtml += `
-          <div class="grid grid-cols-12 gap-2 items-center bg-zinc-950/40 p-1.5 rounded-xl border ${isCompleted ? 'border-emerald-500/40 bg-emerald-950/10' : 'border-zinc-800/80'}">
-            <!-- Set Label -->
-            <div class="col-span-2 font-mono text-xs font-bold ${isCompleted ? 'text-emerald-400' : 'text-zinc-400'} text-left pl-1">
-              #${s}
-            </div>
-
-            <!-- Weight Input -->
-            <div class="col-span-4">
-              <input 
-                type="number" 
-                id="weight_${exercise.id}_${s}" 
-                placeholder="lbs" 
-                value="${savedSet.weight || ''}" 
-                onchange="handleSetInputChange('${exercise.id}', ${s})" 
-                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg py-1.5 px-2 text-center text-sm font-mono font-medium text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-              />
-            </div>
-
-            <!-- Reps Input -->
-            <div class="col-span-3">
-              <input 
-                type="number" 
-                id="reps_${exercise.id}_${s}" 
-                placeholder="${exercise.targetReps.split('–')[0] || '10'}" 
-                value="${savedSet.reps || ''}" 
-                onchange="handleSetInputChange('${exercise.id}', ${s})" 
-                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg py-1.5 px-2 text-center text-sm font-mono font-medium text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-              />
-            </div>
-
-            <!-- Complete Toggle Button -->
-            <div class="col-span-3 flex justify-end">
-              <button 
-                id="btn_check_${exercise.id}_${s}" 
-                onclick="toggleSetComplete('${exercise.id}', ${s}, ${exercise.restSec})" 
-                class="w-9 h-8 rounded-lg flex items-center justify-center transition-all ${isCompleted ? 'bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/30' : 'bg-zinc-800 text-zinc-500 hover:text-zinc-300 border border-zinc-700'}"
-              >
-                <i class="ph-bold ${isCompleted ? 'ph-check' : 'ph-check'} text-base"></i>
-              </button>
-            </div>
-          </div>
-        `;
-      }
-      return rowsHtml;
-    }
-
-    // Handle Input change (auto-save before check)
-    function handleSetInputChange(exerciseId, setNumber) {
-      if (!userWorkoutLogs[exerciseId]) userWorkoutLogs[exerciseId] = [];
-      const weightVal = document.getElementById(`weight_${exerciseId}_${setNumber}`).value;
-      const repsVal = document.getElementById(`reps_${exerciseId}_${setNumber}`).value;
-
-      if (!userWorkoutLogs[exerciseId][setNumber - 1]) {
-        userWorkoutLogs[exerciseId][setNumber - 1] = { weight: "", reps: "", completed: false };
-      }
-
-      userWorkoutLogs[exerciseId][setNumber - 1].weight = weightVal;
-      userWorkoutLogs[exerciseId][setNumber - 1].reps = repsVal;
-      saveLogs();
-    }
-
-    // Toggle Set Completion & Auto Trigger Rest Timer
-    function toggleSetComplete(exerciseId, setNumber, restSeconds) {
-      if (!userWorkoutLogs[exerciseId]) userWorkoutLogs[exerciseId] = [];
-      if (!userWorkoutLogs[exerciseId][setNumber - 1]) {
-        userWorkoutLogs[exerciseId][setNumber - 1] = { weight: "", reps: "", completed: false };
-      }
-
-      const weightEl = document.getElementById(`weight_${exerciseId}_${setNumber}`);
-      const repsEl = document.getElementById(`reps_${exerciseId}_${setNumber}`);
-      
-      const currentStatus = userWorkoutLogs[exerciseId][setNumber - 1].completed;
-      const newStatus = !currentStatus;
-
-      userWorkoutLogs[exerciseId][setNumber - 1].completed = newStatus;
-      userWorkoutLogs[exerciseId][setNumber - 1].weight = weightEl.value || "";
-      userWorkoutLogs[exerciseId][setNumber - 1].reps = repsEl.value || "";
-      userWorkoutLogs[exerciseId][setNumber - 1].timestamp = new Date().toISOString();
-
-      saveLogs();
-      renderDayContent(); // Refresh state
-
-      if (newStatus) {
-        showToast(`Set #${setNumber} Completed!`);
-        playBeep(659, 0.1, 1);
-        if (restSeconds > 0) {
-          startRestTimer(restSeconds, `Set #${setNumber} Complete`);
-        }
-      }
-    }
-
-    // Update Completion Header Stats
-    function updateCompletionStats() {
-      const dayData = PROGRAM_DATA.find(d => d.id === currentSelectedDayId);
-      if (!dayData || dayData.type === "rest") return;
-
-      let totalSets = 0;
-      let completedSets = 0;
-
-      dayData.exercises.forEach(ex => {
-        totalSets += ex.targetSets;
-        const logged = userWorkoutLogs[ex.id] || [];
-        for (let i = 0; i < ex.targetSets; i++) {
-          if (logged[i] && logged[i].completed) {
-            completedSets++;
-          }
-        }
-      });
-
-      const statEl = document.getElementById("dayCompletionStat");
-      if (statEl) {
-        statEl.textContent = `${completedSets}/${totalSets} Sets`;
-        if (completedSets === totalSets && totalSets > 0) {
-          statEl.classList.remove("text-emerald-400");
-          statEl.classList.add("text-emerald-300", "font-black");
-        }
-      }
-    }
-
-    // --- REST TIMER LOGIC ---
-    function startRestTimer(seconds, title = "Rest Interval") {
-      clearInterval(restTimerInterval);
-      restTimerRemainingSec = seconds;
-
-      const timerBar = document.getElementById("restTimerFloatingBar");
-      const titleEl = document.getElementById("activeTimerName");
-      const dotEl = document.getElementById("restTimerPulseDot");
-      titleEl.textContent = title;
-      
-      timerBar.classList.remove("translate-y-full");
-      dotEl.classList.add("timer-pulsing");
-      updateRestTimerDisplay();
-
-      restTimerInterval = setInterval(() => {
-        restTimerRemainingSec--;
-        if (restTimerRemainingSec <= 0) {
-          clearInterval(restTimerInterval);
-          restTimerRemainingSec = 0;
-          updateRestTimerDisplay();
-          dotEl.classList.remove("timer-pulsing");
-          playBeep(880, 0.25, 3);
-          showToast("Rest Finished! Next Set!");
-        } else {
-          updateRestTimerDisplay();
-        }
-      }, 1000);
-    }
-
-    function stopRestTimer() {
-      clearInterval(restTimerInterval);
-      restTimerRemainingSec = 0;
-      updateRestTimerDisplay();
-      document.getElementById("restTimerPulseDot").classList.remove("timer-pulsing");
-    }
-
-    function updateRestTimerDisplay() {
-      const min = Math.floor(restTimerRemainingSec / 60);
-      const sec = restTimerRemainingSec % 60;
-      const formatted = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-      document.getElementById("restTimerSeconds").textContent = formatted;
-      
-      const timerSecEl = document.getElementById("restTimerSeconds");
-      if (restTimerRemainingSec <= 5 && restTimerRemainingSec > 0) {
-        timerSecEl.classList.add("text-rose-400");
-        timerSecEl.classList.remove("text-emerald-400");
-      } else {
-        timerSecEl.classList.remove("text-rose-400");
-        timerSecEl.classList.add("text-emerald-400");
-      }
-    }
-
-    // --- 50M SESSION COUNTDOWN TIMER (5:30 -> 6:20 AM TRACKER) ---
-    function toggleSessionCountdown() {
-      const dayData = PROGRAM_DATA.find(d => d.id === currentSelectedDayId);
-      const capMinutes = dayData ? dayData.targetDurationMinutes : 50;
-
-      if (!sessionIsRunning) {
-        sessionIsRunning = true;
-        sessionElapsedSeconds = 0;
-        document.getElementById("sessionTimerIcon").className = "ph-bold ph-stop text-rose-400";
-        showToast(`Session Timer: ${capMinutes}m Cap Started`);
-        
-        sessionTimerInterval = setInterval(() => {
-          sessionElapsedSeconds++;
-          const totalCapSeconds = capMinutes * 60;
-          const remainingSeconds = totalCapSeconds - sessionElapsedSeconds;
-          
-          if (remainingSeconds <= 0) {
-            document.getElementById("sessionTimerLabel").textContent = "CAP REACHED!";
-            document.getElementById("sessionTimerLabel").classList.add("text-rose-400", "font-bold");
-            playBeep(980, 0.3, 4);
-          } else {
-            const remMin = Math.floor(remainingSeconds / 60);
-            const remSec = remainingSeconds % 60;
-            document.getElementById("sessionTimerLabel").textContent = 
-              `${String(remMin).padStart(2, '0')}:${String(remSec).padStart(2, '0')}`;
-          }
-        }, 1000);
-      } else {
-        clearInterval(sessionTimerInterval);
-        sessionIsRunning = false;
-        document.getElementById("sessionTimerIcon").className = "ph-bold ph-timer text-emerald-400";
-        document.getElementById("sessionTimerLabel").textContent = `${capMinutes}m Cap`;
-        document.getElementById("sessionTimerLabel").classList.remove("text-rose-400");
-        showToast("Session Timer Stopped");
-      }
-    }
-
-    // Toast Utility
-    function showToast(message) {
-      const toast = document.getElementById("toast");
-      const msg = document.getElementById("toastMsg");
-      msg.textContent = message;
-      toast.classList.remove("opacity-0", "pointer-events-none");
-      toast.classList.add("opacity-100");
-      setTimeout(() => {
-        toast.classList.remove("opacity-100");
-        toast.classList.add("opacity-0", "pointer-events-none");
-      }, 2400);
-    }
-
-    // --- MODAL & LOGS MANAGEMENT ---
-    function openHistoryModal() {
-      // Calculate Stats
-      let totalCompleted = 0;
-      Object.keys(userWorkoutLogs).forEach(key => {
-        const arr = userWorkoutLogs[key];
-        if (Array.isArray(arr)) {
-          arr.forEach(s => {
-            if (s && s.completed) totalCompleted++;
-          });
-        }
-      });
-
-      document.getElementById("statTotalSets").textContent = totalCompleted;
-      document.getElementById("statActiveDay").textContent = PROGRAM_DATA.find(d => d.id === currentSelectedDayId).title.split(' ')[0];
-
-      // Populate PR & Exercise Summary
-      const listContainer = document.getElementById("previousLogsList");
-      listContainer.innerHTML = "";
-      
-      const currentDay = PROGRAM_DATA.find(d => d.id === currentSelectedDayId);
-      if (currentDay.type === "workout") {
-        currentDay.exercises.forEach(ex => {
-          const logs = userWorkoutLogs[ex.id] || [];
-          const completedLogged = logs.filter(l => l && l.completed);
-          
-          const row = document.createElement("div");
-          row.className = "bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 flex items-center justify-between";
-          
-          let historySummary = "No entries";
-          if (completedLogged.length > 0) {
-            const bestWeight = Math.max(...completedLogged.map(l => parseFloat(l.weight) || 0));
-            historySummary = `Best: ${bestWeight > 0 ? bestWeight + ' lbs' : 'Logged'} (${completedLogged.length} sets done)`;
-          }
-
-          row.innerHTML = `
-            <span class="font-medium text-zinc-300 truncate max-w-[200px]">${ex.name}</span>
-            <span class="font-mono text-emerald-400 font-bold">${historySummary}</span>
-          `;
-          listContainer.appendChild(row);
-        });
-      }
-
-      document.getElementById("historyModal").classList.remove("hidden");
-    }
-
-    function closeHistoryModal() {
-      document.getElementById("historyModal").classList.add("hidden");
-    }
-
-    function copyWorkoutSummary() {
-      const currentDay = PROGRAM_DATA.find(d => d.id === currentSelectedDayId);
-      let summaryText = `IRONTRACK 40+ LOG - ${currentDay.name} (${currentDay.title})\n`;
-      summaryText += `Date: ${new Date().toLocaleDateString()}\n\n`;
-
-      if (currentDay.type === "workout") {
-        currentDay.exercises.forEach(ex => {
-          summaryText += `* ${ex.name}:\n`;
-          const logs = userWorkoutLogs[ex.id] || [];
-          logs.forEach((set, idx) => {
-            if (set && set.completed) {
-              summaryText += `   Set ${idx + 1}: ${set.weight || '0'} lbs × ${set.reps || '0'} reps\n`;
-            }
-          });
-        });
-      } else {
-        summaryText += "Rest & Recovery Day\n";
-      }
-
-      // Copy text fallback
-      const tempTextArea = document.createElement("textarea");
-      tempTextArea.value = summaryText;
-      document.body.appendChild(tempTextArea);
-      tempTextArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempTextArea);
-
-      showToast("Workout summary copied to clipboard!");
-    }
-
-    function exportJSONBackup() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userWorkoutLogs, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `irontrack_backup_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      showToast("Data backup file downloaded!");
-    }
-
-    function resetCurrentDayData() {
-      const currentDay = PROGRAM_DATA.find(d => d.id === currentSelectedDayId);
-      if (currentDay.type === "workout") {
-        currentDay.exercises.forEach(ex => {
-          if (userWorkoutLogs[ex.id]) {
-            userWorkoutLogs[ex.id].forEach(s => {
-              if (s) s.completed = false;
-            });
-          }
-        });
-        saveLogs();
-        renderDayContent();
-        closeHistoryModal();
-        showToast("Day's checked sets reset!");
-      }
-    }
-
-    // App Initialization
-    window.onload = function() {
-      loadSavedLogs();
-      currentSelectedDayId = getTodayProgramId();
-      renderTabs();
-      renderDayContent();
-    };
-  </script>
-</body>
-</html>
-```
+    const
