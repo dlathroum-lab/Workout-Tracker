@@ -4,9 +4,10 @@ A phone-friendly workout tracker for a 5-day Push / Legs / Pull / Upper / Lower 
 
 ## Features
 - **Saves as you type.** Weights, reps and checkmarks stay put through refreshes, app switches and locked screens.
+- **No ✓ tap needed.** Enter the weight and reps, then tap Done or move to the next box. The set completes itself and the rest timer starts.
 - **"Last time" numbers.** Each exercise shows what you lifted last session, and each box shows last time's number in grey. Tap ✓ on an empty set to reuse those numbers.
 - **History.** Tap "Finish & Save Workout" to log the session. The 📈 History tab lists every workout with sets, duration and total pounds lifted.
-- **Accurate rest timer.** It starts automatically when you check off a set, stays correct when the phone locks, and beeps and vibrates when rest is over. Use +15 to add time.
+- **Accurate rest timer.** It starts automatically with each exercise's rest time when a set is completed. It stays correct when the phone locks, and beeps and vibrates when rest is over. Quick buttons: 30s, 1m, 1:30, 2m, 3m.
 - **Keeps the screen on** during a workout, on supported phones.
 - **Opens on your next workout.** After you finish Day 1, the app opens on Day 2.
 - **Works offline** once installed to your home screen.

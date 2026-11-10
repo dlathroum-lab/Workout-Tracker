@@ -489,11 +489,11 @@
       <span class="timer-label" id="timerStatus">Rest timer</span>
     </div>
     <div class="timer-presets">
-      <button class="preset-btn" data-preset="45">45s</button>
-      <button class="preset-btn" data-preset="60">60s</button>
-      <button class="preset-btn" data-preset="90">90s</button>
+      <button class="preset-btn" data-preset="30">30s</button>
+      <button class="preset-btn" data-preset="60">1m</button>
+      <button class="preset-btn" data-preset="90">1:30</button>
+      <button class="preset-btn" data-preset="120">2m</button>
       <button class="preset-btn" data-preset="180">3m</button>
-      <button class="preset-btn" data-add="15">+15</button>
       <button class="preset-btn cancel" data-stop aria-label="Stop timer">✕</button>
     </div>
   </div>
@@ -666,7 +666,12 @@
     function esc(v) {
       return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
-    function fmtRest(sec) { return sec <= 90 ? sec + 's' : (sec / 60) + 'm'; }
+    // 45 → "45s", 60 → "1m", 90 → "1:30", 150 → "2:30"
+    function fmtRest(sec) {
+      if (sec < 60) return sec + 's';
+      const m = Math.floor(sec / 60), s = sec % 60;
+      return s ? m + ':' + String(s).padStart(2, '0') : m + 'm';
+    }
     function fmtClock(totalSec) {
       totalSec = Math.max(0, Math.floor(totalSec));
       const h = Math.floor(totalSec / 3600), m = Math.floor((totalSec % 3600) / 60), s = totalSec % 60;
@@ -893,11 +898,6 @@
       runTimer();
     }
 
-    function addTime(seconds) {
-      if (state.timerEnd && state.timerEnd > Date.now()) { state.timerEnd += seconds * 1000; save(); tickTimer(); }
-      else startTimer(seconds);
-    }
-
     function stopTimer() {
       state.timerEnd = null;
       save();
@@ -1044,30 +1044,50 @@
       save();
     });
 
+    // Mark a set done (or not done). Done = saved + rest timer starts.
+    function setDone(row, done) {
+      const exId = row.dataset.ex;
+      const s = setData(activeView, exId, +row.dataset.i);
+      s.done = done;
+
+      if (done) {
+        // Empty boxes? Fill them with last time's numbers.
+        row.querySelectorAll('input[data-f]').forEach(inp => {
+          if (inp.value === '' && inp.placeholder !== '') { inp.value = inp.placeholder; s[inp.dataset.f] = inp.placeholder; }
+        });
+        const rest = EX_INDEX[exId].rest;
+        if (rest > 0) startTimer(rest);
+        if (navigator.vibrate) navigator.vibrate(40);
+        markStarted(activeView);
+      }
+      const check = row.querySelector('.check-btn');
+      check.classList.toggle('completed', done);
+      check.setAttribute('aria-pressed', done);
+      row.classList.toggle('done', done);
+      const card = row.closest('.exercise-card');
+      card.classList.toggle('all-done', [...card.querySelectorAll('.check-btn')].every(b => b.classList.contains('completed')));
+      save();
+    }
+
+    // When you finish typing (leave the box or tap Done on the keyboard) and
+    // the set has both weight and reps, it completes itself — no ✓ tap needed.
+    mainEl.addEventListener('change', e => {
+      const input = e.target.closest('input[data-f]');
+      if (!input) return;
+      const row = input.closest('.set-row');
+      const s = setData(activeView, row.dataset.ex, +row.dataset.i);
+      if (!s.done && s.w !== '' && s.r !== '') setDone(row, true);
+    });
+
+    mainEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.matches('input[data-f]')) e.target.blur();
+    });
+
     mainEl.addEventListener('click', e => {
       const check = e.target.closest('.check-btn');
       if (check) {
         const row = check.closest('.set-row');
-        const exId = row.dataset.ex;
-        const s = setData(activeView, exId, +row.dataset.i);
-        s.done = !s.done;
-
-        if (s.done) {
-          // Empty boxes? Fill them with last time's numbers.
-          row.querySelectorAll('input[data-f]').forEach(inp => {
-            if (inp.value === '' && inp.placeholder !== '') { inp.value = inp.placeholder; s[inp.dataset.f] = inp.placeholder; }
-          });
-          const rest = EX_INDEX[exId].rest;
-          if (rest > 0) startTimer(rest);
-          if (navigator.vibrate) navigator.vibrate(40);
-          markStarted(activeView);
-        }
-        check.classList.toggle('completed', s.done);
-        check.setAttribute('aria-pressed', s.done);
-        row.classList.toggle('done', s.done);
-        const card = row.closest('.exercise-card');
-        card.classList.toggle('all-done', [...card.querySelectorAll('.check-btn')].every(b => b.classList.contains('completed')));
-        save();
+        setDone(row, !check.classList.contains('completed'));
         return;
       }
 
@@ -1096,7 +1116,6 @@
       const b = e.target.closest('button');
       if (!b) return;
       if (b.dataset.preset) startTimer(+b.dataset.preset);
-      else if (b.dataset.add) addTime(+b.dataset.add);
       else if ('stop' in b.dataset) stopTimer();
     });
 
