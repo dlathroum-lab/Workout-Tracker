@@ -1,6 +1,6 @@
 // IronTrack offline support.
 // Bump CACHE when you change any file so phones pick up the new version.
-const CACHE = 'irontrack-v2';
+const CACHE = 'irontrack-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -35,7 +35,7 @@ self.addEventListener('fetch', event => {
   // to the saved copy after 3 seconds so it still opens with bad gym signal.
   if (req.mode === 'navigate') {
     event.respondWith(
-      Promise.race([fetch(req), timeout(3000)])
+      Promise.race([fetch(req.url, { cache: 'no-cache' }), timeout(3000)])
         .then(res => {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put('./index.html', copy));

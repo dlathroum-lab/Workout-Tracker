@@ -447,6 +447,109 @@
     }
     .backup-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 
+    .timer-display { cursor: pointer; }
+
+    .set-row.next-up {
+      outline: 2px solid var(--accent-bright);
+      outline-offset: 3px;
+      border-radius: 8px;
+    }
+
+    /* Rest splash screen */
+    .rest-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(13, 17, 23, 0.98);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+      text-align: center;
+    }
+    .rest-overlay[hidden] { display: none; }
+
+    .ro-label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .ro-ring {
+      position: relative;
+      width: min(72vw, 300px);
+      aspect-ratio: 1;
+    }
+    .ro-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ro-ring circle { fill: none; stroke-width: 8; }
+    .ro-track { stroke: var(--card-border); }
+    .ro-prog { stroke: var(--accent-bright); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
+
+    .ro-time {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(3.5rem, 18vw, 5.5rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ro-next {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 320px;
+      line-height: 1.45;
+      min-height: 2.9em;
+    }
+    .ro-next b { color: var(--text-main); }
+
+    .ro-actions { display: flex; gap: 10px; }
+    .ro-btn {
+      background: var(--timer-bg);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ro-btn.primary { background: var(--accent); border-color: var(--accent); }
+
+    .ro-hide {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      text-decoration: underline;
+      font-size: 0.85rem;
+      padding: 8px;
+      cursor: pointer;
+    }
+    .ro-tap { display: none; font-weight: 700; }
+
+    /* Rest over: flash green/white */
+    .rest-overlay.done {
+      background: #2ea043;
+      color: #0d1117;
+      animation: ro-flash 0.4s steps(1) 8;
+      cursor: pointer;
+    }
+    @keyframes ro-flash { 0% { background: #f0f6fc; } 50% { background: #2ea043; } }
+    .rest-overlay.done .ro-label,
+    .rest-overlay.done .ro-next,
+    .rest-overlay.done .ro-next b { color: #0d1117; }
+    .rest-overlay.done .ro-prog { stroke: #0d1117; }
+    .rest-overlay.done .ro-track { stroke: rgba(13, 17, 23, 0.25); }
+    .rest-overlay.done .ro-actions,
+    .rest-overlay.done .ro-hide { display: none; }
+    .rest-overlay.done .ro-tap { display: block; }
+
     .toast {
       position: fixed;
       left: 50%;
@@ -496,6 +599,25 @@
       <button class="preset-btn" data-preset="180">3m</button>
       <button class="preset-btn cancel" data-stop aria-label="Stop timer">✕</button>
     </div>
+  </div>
+
+  <!-- Full-screen rest countdown -->
+  <div class="rest-overlay" id="restOverlay" hidden role="dialog" aria-label="Rest timer">
+    <div class="ro-label" id="roLabel">Rest</div>
+    <div class="ro-ring">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="ro-track" cx="60" cy="60" r="54"/>
+        <circle class="ro-prog" id="roProg" cx="60" cy="60" r="54" stroke-dasharray="339.292" stroke-dashoffset="0"/>
+      </svg>
+      <div class="ro-time" id="roTime" aria-live="off">00:00</div>
+    </div>
+    <div class="ro-next" id="roNext"></div>
+    <div class="ro-actions">
+      <button class="ro-btn" data-ro="add">+30s</button>
+      <button class="ro-btn primary" data-ro="skip">Skip rest</button>
+    </div>
+    <button class="ro-hide" data-ro="hide">Hide (timer keeps running)</button>
+    <div class="ro-tap">Tap anywhere to continue</div>
   </div>
 
   <div class="toast" id="toast" role="status"></div>
@@ -597,6 +719,7 @@
     ];
 
     /* ================= Storage ================= */
+    const APP_VERSION = 3; // shown at the bottom of History; bump with sw.js CACHE
     const STORE_KEY = 'irontrack.v2';
     const LIFT_DAYS = PROGRAM.filter(d => !d.rest);
     const EX_INDEX = {};
@@ -835,6 +958,7 @@
         ${list}
         <div class="backup">
           Your data is stored only on this phone, in this browser. Export a backup now and then so you don't lose it.
+          <div style="margin-top:6px">App version ${APP_VERSION}</div>
           <div class="backup-row">
             <button class="preset-btn" data-action="export">⬇ Export backup</button>
             <button class="preset-btn" data-action="import">⬆ Import backup</button>
@@ -864,38 +988,27 @@
        Stores the END time, so it stays correct even if the phone
        locks or the page reloads. */
     let timerTick = null;
-    let audioCtx = null;
+    const overlay = document.getElementById('restOverlay');
+    const RING_C = 2 * Math.PI * 54; // ring circumference (r = 54)
+    let doneTimeout = null;
 
-    function unlockAudio() {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-      } catch (e) {}
-    }
-    document.addEventListener('pointerdown', unlockAudio);
-
-    function beep() {
-      if (!audioCtx) return;
-      try {
-        const t = audioCtx.currentTime;
-        [0, 0.3, 0.6].forEach(o => {
-          const osc = audioCtx.createOscillator();
-          const g = audioCtx.createGain();
-          osc.frequency.value = 880;
-          g.gain.setValueAtTime(0.0001, t + o);
-          g.gain.exponentialRampToValueAtTime(0.5, t + o + 0.02);
-          g.gain.exponentialRampToValueAtTime(0.0001, t + o + 0.22);
-          osc.connect(g); g.connect(audioCtx.destination);
-          osc.start(t + o); osc.stop(t + o + 0.25);
-        });
-      } catch (e) {}
-    }
-
-    function startTimer(seconds) {
+    function startTimer(seconds, next) {
       state.timerEnd = Date.now() + seconds * 1000;
+      state.timerTotal = seconds;
+      state.timerNext = next || null;
       save();
+      clearTimeout(doneTimeout);
       document.getElementById('timerBar').classList.remove('finished');
+      openOverlay();
       runTimer();
+    }
+
+    function addRest(seconds) {
+      if (!state.timerEnd) return;
+      state.timerEnd += seconds * 1000;
+      state.timerTotal = Math.max(state.timerTotal || 0, Math.ceil((state.timerEnd - Date.now()) / 1000));
+      save();
+      tickTimer();
     }
 
     function stopTimer() {
@@ -905,6 +1018,55 @@
       timerTick = null;
       document.getElementById('timerBar').classList.remove('finished');
       showTimer(0, false);
+      closeOverlay();
+    }
+
+    /* ----- Splash screen ----- */
+    function openOverlay() {
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); // drop the keyboard
+      clearTimeout(doneTimeout);
+      overlay.classList.remove('done');
+      document.getElementById('roLabel').textContent = 'Rest';
+      document.getElementById('roNext').innerHTML = nextText();
+      overlay.hidden = false;
+    }
+
+    function closeOverlay() {
+      clearTimeout(doneTimeout);
+      overlay.hidden = true;
+      overlay.classList.remove('done');
+    }
+
+    function nextText() {
+      const n = state.timerNext;
+      if (!n) return '';
+      if (n.done) return '<b>Last set done!</b><br>Tap “Finish &amp; Save Workout” when you’re ready.';
+      return 'Up next: <b>' + esc(n.name) + '</b><br>Set ' + n.set + ' of ' + n.of;
+    }
+
+    function restOver() {
+      const bar = document.getElementById('timerBar');
+      bar.classList.remove('finished'); void bar.offsetWidth; bar.classList.add('finished');
+      document.getElementById('roLabel').textContent = 'Rest over';
+      document.getElementById('roTime').textContent = 'GO!';
+      document.getElementById('roProg').style.strokeDashoffset = 0;
+      document.getElementById('roNext').innerHTML = nextText();
+      overlay.hidden = false;
+      overlay.classList.remove('done'); void overlay.offsetWidth; overlay.classList.add('done');
+      if (navigator.vibrate) navigator.vibrate([500, 150, 500, 150, 700]);
+      doneTimeout = setTimeout(dismissDone, 6000);
+    }
+
+    // Close the "GO!" screen and point at the next set.
+    function dismissDone() {
+      closeOverlay();
+      const n = state.timerNext;
+      if (!n || n.done) return;
+      const row = mainEl.querySelector(`.set-row[data-ex="${n.ex}"][data-i="${n.i}"]`);
+      if (!row) return;
+      row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      row.classList.add('next-up');
+      setTimeout(() => row.classList.remove('next-up'), 2500);
     }
 
     function runTimer() {
@@ -915,21 +1077,23 @@
 
     function tickTimer() {
       if (!state.timerEnd) return;
-      const left = Math.ceil((state.timerEnd - Date.now()) / 1000);
-      if (left > 0) { showTimer(left, true); return; }
+      const msLeft = state.timerEnd - Date.now();
+      const left = Math.ceil(msLeft / 1000);
+      if (left > 0) {
+        showTimer(left, true);
+        document.getElementById('roTime').textContent = fmtClock(left);
+        const frac = Math.max(0, Math.min(1, msLeft / ((state.timerTotal || left) * 1000)));
+        document.getElementById('roProg').style.strokeDashoffset = RING_C * (1 - frac);
+        return;
+      }
       // Finished
-      const lateBy = Date.now() - state.timerEnd;
       state.timerEnd = null;
       save();
       clearInterval(timerTick);
       timerTick = null;
-      showTimer(0, false, lateBy < 5000 ? 'GO! Next set' : 'Rest timer');
-      if (lateBy < 5000) {
-        const bar = document.getElementById('timerBar');
-        bar.classList.remove('finished'); void bar.offsetWidth; bar.classList.add('finished');
-        beep();
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      }
+      showTimer(0, false);
+      // Flash + vibrate, unless you came back long after it ended.
+      if (-msLeft < 60000) restOver(); else closeOverlay();
     }
 
     function showTimer(sec, running, label) {
@@ -1034,6 +1198,22 @@
 
     const mainEl = document.getElementById('main');
 
+    // Auto-complete: once a set has weight AND reps, it checks itself
+    // 1.5s after you stop typing (or right away when you leave the box).
+    const autoTimers = new WeakMap();
+    function readyToComplete(row) {
+      const s = setData(activeView, row.dataset.ex, +row.dataset.i);
+      return !s.done && s.w !== '' && s.r !== '';
+    }
+    function maybeAutoComplete(row, immediately) {
+      clearTimeout(autoTimers.get(row));
+      if (!readyToComplete(row)) return;
+      if (immediately) { setDone(row, true); return; }
+      autoTimers.set(row, setTimeout(() => {
+        if (row.isConnected && readyToComplete(row)) setDone(row, true);
+      }, 1500));
+    }
+
     mainEl.addEventListener('input', e => {
       const input = e.target.closest('input[data-f]');
       if (!input) return;
@@ -1042,6 +1222,7 @@
       s[input.dataset.f] = input.value;
       markStarted(activeView);
       save();
+      maybeAutoComplete(row, false);
     });
 
     // Mark a set done (or not done). Done = saved + rest timer starts.
@@ -1049,14 +1230,13 @@
       const exId = row.dataset.ex;
       const s = setData(activeView, exId, +row.dataset.i);
       s.done = done;
+      clearTimeout(autoTimers.get(row));
 
       if (done) {
         // Empty boxes? Fill them with last time's numbers.
         row.querySelectorAll('input[data-f]').forEach(inp => {
           if (inp.value === '' && inp.placeholder !== '') { inp.value = inp.placeholder; s[inp.dataset.f] = inp.placeholder; }
         });
-        const rest = EX_INDEX[exId].rest;
-        if (rest > 0) startTimer(rest);
         if (navigator.vibrate) navigator.vibrate(40);
         markStarted(activeView);
       }
@@ -1067,6 +1247,22 @@
       const card = row.closest('.exercise-card');
       card.classList.toggle('all-done', [...card.querySelectorAll('.check-btn')].every(b => b.classList.contains('completed')));
       save();
+
+      if (done) {
+        const rest = EX_INDEX[exId].rest;
+        if (rest > 0) startTimer(rest, nextUp());
+      }
+    }
+
+    // The next unfinished set on this page, in order (handles supersets:
+    // after A2 set 1 the next one is A1 set 2).
+    function nextUp() {
+      const rows = mainEl.querySelectorAll('.set-row');
+      if (!rows.length) return null;
+      const row = [...rows].find(r => !r.classList.contains('done'));
+      if (!row) return { done: true };
+      const ex = EX_INDEX[row.dataset.ex];
+      return { ex: ex.id, i: +row.dataset.i, name: ex.name, set: +row.dataset.i + 1, of: ex.sets };
     }
 
     // When you finish typing (leave the box or tap Done on the keyboard) and
@@ -1074,9 +1270,7 @@
     mainEl.addEventListener('change', e => {
       const input = e.target.closest('input[data-f]');
       if (!input) return;
-      const row = input.closest('.set-row');
-      const s = setData(activeView, row.dataset.ex, +row.dataset.i);
-      if (!s.done && s.w !== '' && s.r !== '') setDone(row, true);
+      maybeAutoComplete(input.closest('.set-row'), true);
     });
 
     mainEl.addEventListener('keydown', e => {
@@ -1092,7 +1286,7 @@
       }
 
       const trigger = e.target.closest('.timer-trigger');
-      if (trigger) { startTimer(+trigger.dataset.time); return; }
+      if (trigger) { startTimer(+trigger.dataset.time, nextUp()); return; }
 
       const actionBtn = e.target.closest('[data-action]');
       if (!actionBtn) return;
@@ -1115,20 +1309,44 @@
     document.querySelector('.timer-presets').addEventListener('click', e => {
       const b = e.target.closest('button');
       if (!b) return;
-      if (b.dataset.preset) startTimer(+b.dataset.preset);
+      if (b.dataset.preset) startTimer(+b.dataset.preset, nextUp());
       else if ('stop' in b.dataset) stopTimer();
+    });
+
+    overlay.addEventListener('click', e => {
+      if (overlay.classList.contains('done')) { dismissDone(); return; }
+      const b = e.target.closest('[data-ro]');
+      if (!b) return;
+      if (b.dataset.ro === 'add') addRest(30);
+      else if (b.dataset.ro === 'skip') stopTimer();
+      else if (b.dataset.ro === 'hide') closeOverlay();
+    });
+
+    // Tap the time in the bottom bar to bring the countdown screen back.
+    document.querySelector('.timer-display').addEventListener('click', () => {
+      if (state.timerEnd) { openOverlay(); tickTimer(); }
     });
 
     /* ================= Start ================= */
     renderAll();
     if (state.timerEnd) {
-      if (state.timerEnd > Date.now()) runTimer();
+      if (state.timerEnd > Date.now()) { openOverlay(); runTimer(); }
       else { state.timerEnd = null; save(); }
     }
 
     // Offline support (works when served from GitHub Pages / any web server).
+    // When a new version is uploaded, the app reloads itself onto it.
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+      const hadController = !!navigator.serviceWorker.controller;
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController && !reloading) { reloading = true; location.reload(); }
+      });
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+          .then(reg => reg.update())
+          .catch(() => {});
+      });
     }
   </script>
 </body>
