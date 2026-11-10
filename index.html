@@ -8,7 +8,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IronTrack">
   <meta name="theme-color" content="#0d1117">
+
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22IronTrack%2040%2B%22%2C%22short_name%22%3A%22IronTrack%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d1117%22%2C%22theme_color%22%3A%22%230d1117%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2720%27%20fill%3D%27%230d1117%27%2F%3E%3Cpath%20d%3D%27M30%2035%20h10%20v30%20h-10%20z%20M60%2035%20h10%20v30%20h-10%20z%20M40%2047%20h20%20v6%20h-20%20z%27%20fill%3D%27%2338d39f%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 
   <style>
     :root {
@@ -35,7 +38,7 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding-bottom: 90px;
+      padding-bottom: 95px;
       user-select: none;
     }
 
@@ -338,25 +341,24 @@
         <span>🏋️ IRONTRACK</span>
         <span class="badge-40">40+ ELITE</span>
       </div>
-      <div class="session-clock">50m Cap</div>
+      <div class="session-clock" id="sessionTag">Day 1: 50m</div>
     </div>
     <div class="day-selector">
-      <button class="day-btn active" onclick="switchDay('mon', this)">🏋️ Mon</button>
-      <button class="day-btn" onclick="switchDay('tue', this)">🏋️ Tue</button>
-      <button class="day-btn" onclick="switchDay('wed', this)">🛌 Wed</button>
-      <button class="day-btn" onclick="switchDay('thu', this)">🚶 Thu</button>
-      <button class="day-btn" onclick="switchDay('fri', this)">🏋️ Fri</button>
-      <button class="day-btn" onclick="switchDay('sat', this)">🏋️ Sat</button>
-      <button class="day-btn" onclick="switchDay('sun', this)">🏋️ Sun</button>
+      <button class="day-btn active" data-target="view-day1" data-label="Day 1: 50m">Day 1: Push</button>
+      <button class="day-btn" data-target="view-day2" data-label="Day 2: 50m">Day 2: Legs</button>
+      <button class="day-btn" data-target="view-day3" data-label="Day 3: 50m">Day 3: Pull</button>
+      <button class="day-btn" data-target="view-day4" data-label="Day 4: 70m">Day 4: Upper</button>
+      <button class="day-btn" data-target="view-day5" data-label="Day 5: 70m">Day 5: Lower</button>
+      <button class="day-btn" data-target="view-off" data-label="Off / Rest">Off / Walk</button>
     </div>
   </header>
 
   <main>
-    <!-- MONDAY VIEW -->
-    <div id="view-mon" class="day-view active">
+    <!-- DAY 1: PUSH HYPERTROPHY -->
+    <div id="view-day1" class="day-view active">
       <div class="workout-meta">
-        <div class="workout-title">Push Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">Monday 5:30 AM</span></div>
-        <div class="workout-desc">Strict 50m cap. Antagonistic supersets at locked stations. Zero shoulder pain.</div>
+        <div class="workout-title">Day 1: Push Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(50 Min Window)</span></div>
+        <div class="workout-desc">30–35m lifting + 15m warm-up or cool-down treadmill walk (0.75–1.0 mi @ 3.2 mph).</div>
       </div>
 
       <div class="exercise-card">
@@ -366,14 +368,14 @@
             <div class="ex-name">Low-Incline DB Bench Press</div>
             <div class="ex-params">4 sets × 8–10 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(60)">⏱ 60s</button>
+          <button class="preset-btn timer-trigger" data-time="60">⏱ 60s</button>
         </div>
-        <div class="ex-notes">ℹ 30° incline, semi-neutral grip. Slow 3-sec negative.</div>
+        <div class="ex-notes">ℹ 30° incline, semi-neutral grip. Slow 3-sec negative. 60s rest between sets.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 60)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 60)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 60)">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 60)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
         </div>
       </div>
 
@@ -384,13 +386,13 @@
             <div class="ex-name">Cable Chest Press-Around / Flye</div>
             <div class="ex-params">3 sets × 12 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → A2</span>
         </div>
-        <div class="ex-notes">ℹ Lock at cable station. 2-sec stretch pause at bottom.</div>
+        <div class="ex-notes">ℹ Lock at cable tower. 2-sec stretch pause. Go straight to Lateral Raises with 0s rest.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
         </div>
       </div>
 
@@ -401,13 +403,13 @@
             <div class="ex-name">Standing Cable Lateral Raise</div>
             <div class="ex-params">3 sets × 12–15 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
         </div>
-        <div class="ex-notes">ℹ Constant deltoid tension. Controlled tempo.</div>
+        <div class="ex-notes">ℹ Constant deltoid tension. Take 45s rest only AFTER completing this exercise.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
         </div>
       </div>
 
@@ -418,13 +420,13 @@
             <div class="ex-name">Seated DB Arnold Press</div>
             <div class="ex-params">3 sets × 10–12 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → B2</span>
         </div>
-        <div class="ex-notes">ℹ Smooth rotation, protect acromial space.</div>
+        <div class="ex-notes">ℹ Smooth rotation, keep elbows under wrists. Go straight to Triceps with 0s rest.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
         </div>
       </div>
 
@@ -435,22 +437,22 @@
             <div class="ex-name">Cross-Body Cable Triceps Extension</div>
             <div class="ex-params">3 sets × 12–15 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
         </div>
-        <div class="ex-notes">ℹ Spares elbow tendons completely. Full squeeze.</div>
+        <div class="ex-notes">ℹ Spares elbow tendons completely. Take 45s rest only AFTER completing this exercise.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
         </div>
       </div>
     </div>
 
-    <!-- TUESDAY VIEW -->
-    <div id="view-tue" class="day-view">
+    <!-- DAY 2: LEGS HYPERTROPHY -->
+    <div id="view-day2" class="day-view">
       <div class="workout-meta">
-        <div class="workout-title">Legs Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">Tuesday 5:30 AM</span></div>
-        <div class="workout-desc">Zero spinal compression. Drive pure quad/hamstring exhaustion with fixed machines.</div>
+        <div class="workout-title">Day 2: Legs Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(50 Min Window)</span></div>
+        <div class="workout-desc">Zero spinal compression. Pure quad/hamstring isolation via fixed machines.</div>
       </div>
 
       <div class="exercise-card">
@@ -460,14 +462,14 @@
             <div class="ex-name">Hack Squat or 45° Leg Press</div>
             <div class="ex-params">4 sets × 10–12 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(75)">⏱ 75s</button>
+          <button class="preset-btn timer-trigger" data-time="75">⏱ 75s</button>
         </div>
-        <div class="ex-notes">ℹ Controlled 3-sec negative. Keep feet mid-platform.</div>
+        <div class="ex-notes">ℹ 3-sec negative. Lower back flat to pad. 75s rest between working sets.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 75)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 75)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 75)">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 75)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="75">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="75">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="75">✓</button></div>
+          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="75">✓</button></div>
         </div>
       </div>
 
@@ -478,14 +480,14 @@
             <div class="ex-name">Seated Leg Curl</div>
             <div class="ex-params">4 sets × 10–12 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(45)">⏱ 45s</button>
+          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → A2</span>
         </div>
-        <div class="ex-notes">ℹ Full stretch at top. Seated creates better hamstring length tension.</div>
+        <div class="ex-notes">ℹ Full stretch at top. 2-sec squeeze. Go straight to Leg Extensions with 0s rest.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 45)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 45)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 45)">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 45)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
         </div>
       </div>
 
@@ -496,14 +498,14 @@
             <div class="ex-name">Leg Extension</div>
             <div class="ex-params">4 sets × 12–15 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(45)">⏱ 45s</button>
+          <button class="preset-btn timer-trigger" data-time="60">⏱ 60s</button>
         </div>
-        <div class="ex-notes">ℹ Point toes slightly in. Hold peak squeeze 1 second.</div>
+        <div class="ex-notes">ℹ Point toes slightly in. Take 60s rest only AFTER completing this exercise.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 45)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 45)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 45)">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 45)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
         </div>
       </div>
 
@@ -514,13 +516,13 @@
             <div class="ex-name">Dumbbell Romanian Deadlift</div>
             <div class="ex-params">3 sets × 10 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → B2</span>
         </div>
-        <div class="ex-notes">ℹ Soft knees, push hips back to wall. Stop at shin height.</div>
+        <div class="ex-notes">ℹ Soft knees, push hips back to wall. Go straight to Calf Raises with 0s rest.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
         </div>
       </div>
 
@@ -531,40 +533,22 @@
             <div class="ex-name">Standing DB Calf Raise</div>
             <div class="ex-params">3 sets × 15 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
         </div>
-        <div class="ex-notes">ℹ 2-sec dead pause at bottom stretch on every rep.</div>
+        <div class="ex-notes">ℹ 2-sec dead pause at bottom stretch on every rep. Take 45s rest after completion.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
         </div>
       </div>
     </div>
 
-    <!-- WEDNESDAY VIEW -->
-    <div id="view-wed" class="day-view">
-      <div class="rest-screen">
-        <div class="rest-icon">🛌</div>
-        <div class="rest-title">Rest Day / Late Night</div>
-        <div class="rest-p">Full recovery day. Focus on hydration and quality nutrition leading into your late night.</div>
-      </div>
-    </div>
-
-    <!-- THURSDAY VIEW -->
-    <div id="view-thu" class="day-view">
-      <div class="rest-screen">
-        <div class="rest-icon">🚶</div>
-        <div class="rest-title">Active Walk & Spinal Flush</div>
-        <div class="rest-p">Sleep in. 30–45 minute outdoor walk or incline walk to flush the legs and decompress the discs.</div>
-      </div>
-    </div>
-
-    <!-- FRIDAY VIEW -->
-    <div id="view-fri" class="day-view">
+    <!-- DAY 3: PULL HYPERTROPHY -->
+    <div id="view-day3" class="day-view">
       <div class="workout-meta">
-        <div class="workout-title">Pull Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">Friday 5:30 AM</span></div>
-        <div class="workout-desc">Upper back density and arms. Zero lumbar strain before Sunday.</div>
+        <div class="workout-title">Day 3: Pull Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(50 Min Window)</span></div>
+        <div class="workout-desc">Upper back density and arms. Zero lumbar strain to save the spine for Sunday.</div>
       </div>
 
       <div class="exercise-card">
@@ -574,14 +558,14 @@
             <div class="ex-name">Neutral-Grip Lat Pulldown</div>
             <div class="ex-params">4 sets × 8–10 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(60)">⏱ 60s</button>
+          <button class="preset-btn timer-trigger" data-time="60">⏱ 60s</button>
         </div>
-        <div class="ex-notes">ℹ Full lat flare at top, drive elbows straight down.</div>
+        <div class="ex-notes">ℹ Full lat flare at top, drive elbows straight down. 60s rest between sets.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 60)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 60)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 60)">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 60)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
+          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
         </div>
       </div>
 
@@ -592,13 +576,13 @@
             <div class="ex-name">Chest-Supported Incline DB Row</div>
             <div class="ex-params">3 sets × 8–10 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → A2</span>
         </div>
-        <div class="ex-notes">ℹ Chest on pad removes all lumbar spinal shear.</div>
+        <div class="ex-notes">ℹ Chest on pad eliminates spinal shear. Go straight to Face Pulls with 0s rest.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
         </div>
       </div>
 
@@ -609,13 +593,13 @@
             <div class="ex-name">Cable Face Pull</div>
             <div class="ex-params">3 sets × 15 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
         </div>
-        <div class="ex-notes">ℹ Pull high with external rotation. Squeeze rear delts.</div>
+        <div class="ex-notes">ℹ High pull with external rotation. Squeeze rear delts. Take 45s rest after completion.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
         </div>
       </div>
 
@@ -626,13 +610,13 @@
             <div class="ex-name">45° Back Extension</div>
             <div class="ex-params">3 sets × 12–15 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → B2</span>
         </div>
-        <div class="ex-notes">ℹ Glute/hamstring squeeze at top. Hold light plate.</div>
+        <div class="ex-notes">ℹ Glute/hamstring squeeze at top. Go straight to Biceps Curls with 0s rest.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
         </div>
       </div>
 
@@ -643,22 +627,22 @@
             <div class="ex-name">Incline DB Biceps Curl</div>
             <div class="ex-params">3 sets × 10–12 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(30)">⏱ 30s</button>
+          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
         </div>
-        <div class="ex-notes">ℹ Strict 3-sec negative. Maximum bicep stretch.</div>
+        <div class="ex-notes">ℹ Strict 3-sec negative. Maximum bicep stretch. Take 45s rest after completion.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 30)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
         </div>
       </div>
     </div>
 
-    <!-- SATURDAY VIEW -->
-    <div id="view-sat" class="day-view">
+    <!-- DAY 4: UPPER STRENGTH -->
+    <div id="view-day4" class="day-view">
       <div class="workout-meta">
-        <div class="workout-title">Upper Strength (Heavy Neural) <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">Saturday 65–70 Min</span></div>
-        <div class="workout-desc">Take your time. Full CNS warmups, 2.5–3m rest on heavy compound working sets.</div>
+        <div class="workout-title">Day 4: Upper Strength <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(65–70 Min Runway)</span></div>
+        <div class="workout-desc">Heavy compound neural loading. 2.5–3m rest between primary working sets.</div>
       </div>
 
       <div class="exercise-card">
@@ -668,14 +652,14 @@
             <div class="ex-name">Barbell Incline Bench Press</div>
             <div class="ex-params">4 sets × 4–6 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(180)">⏱ 3m</button>
+          <button class="preset-btn timer-trigger" data-time="180">⏱ 3m</button>
         </div>
-        <div class="ex-notes">ℹ RPE 8. Keep 1–2 reps in reserve. 2.5–3m rest.</div>
+        <div class="ex-notes">ℹ RPE 8. Keep 1–2 reps in reserve. 2.5–3m rest between sets.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 180)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 180)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 180)">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 180)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
         </div>
       </div>
 
@@ -686,14 +670,14 @@
             <div class="ex-name">Pendlay Row or Heavy Seal Row</div>
             <div class="ex-params">4 sets × 5 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(150)">⏱ 2.5m</button>
+          <button class="preset-btn timer-trigger" data-time="150">⏱ 2.5m</button>
         </div>
-        <div class="ex-notes">ℹ Dead stop off floor on every rep. Explosive pull.</div>
+        <div class="ex-notes">ℹ Dead stop off floor on every rep. Explosive concentric pull.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 150)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 150)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 150)">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 150)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="150">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="150">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="150">✓</button></div>
+          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="150">✓</button></div>
         </div>
       </div>
 
@@ -704,13 +688,13 @@
             <div class="ex-name">Standing Barbell Overhead Press</div>
             <div class="ex-params">3 sets × 5 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(120)">⏱ 2m</button>
+          <button class="preset-btn timer-trigger" data-time="120">⏱ 2m</button>
         </div>
-        <div class="ex-notes">ℹ Brace glutes and core tight. Zero low-back hyperextension.</div>
+        <div class="ex-notes">ℹ Brace glutes and abs tight. Zero lumbar hyperextension.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 120)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 120)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 120)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
         </div>
       </div>
 
@@ -721,21 +705,21 @@
             <div class="ex-name">Weighted Neutral-Grip Pull-ups</div>
             <div class="ex-params">3 sets × 6 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(120)">⏱ 2m</button>
+          <button class="preset-btn timer-trigger" data-time="120">⏱ 2m</button>
         </div>
-        <div class="ex-notes">ℹ Strict full hang to chin clearing bar.</div>
+        <div class="ex-notes">ℹ Strict full hang to chin clearing bar. 2m rest.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 120)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 120)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 120)">✓</button></div>
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
         </div>
       </div>
     </div>
 
-    <!-- SUNDAY VIEW -->
-    <div id="view-sun" class="day-view">
+    <!-- DAY 5: LOWER STRENGTH -->
+    <div id="view-day5" class="day-view">
       <div class="workout-meta">
-        <div class="workout-title">Lower Strength (Axial & Power) <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">Sunday 65–70 Min</span></div>
+        <div class="workout-title">Day 5: Lower Strength <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(65–70 Min Runway)</span></div>
         <div class="workout-desc">Safety squat bar and high-handle trap bar keep heavy loads centered, preserving the spine.</div>
       </div>
 
@@ -746,11 +730,180 @@
             <div class="ex-name">SSB Squats or Front Squats</div>
             <div class="ex-params">4 sets × 4–5 reps</div>
           </div>
-          <button class="preset-btn" onclick="startTimer(180)">⏱ 3m</button>
+          <button class="preset-btn timer-trigger" data-time="180">⏱ 3m</button>
         </div>
-        <div class="ex-notes">ℹ SSB preserves shoulders and keeps lumbar spine vertical.</div>
+        <div class="ex-notes">ℹ SSB preserves shoulders and keeps lumbar spine vertical. 3m rest.</div>
         <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 180)">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 180)">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" onclick="toggleBtn(this, 180)">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="card-header">
+          <div>
+            <span class="group-tag tag-primary">Primary Hinge</span>
+            <div class="ex-name">Trap Bar Deadlift (High Handle)</div>
+            <div class="ex-params">3 sets × 5 reps</div>
+          </div>
+          <button class="preset-btn timer-trigger" data-time="180">⏱ 3m</button>
+        </div>
+        <div class="ex-notes">ℹ Dead stop each rep. High handles minimize spinal shear. 3m rest.</div>
+        <div class="sets-container">
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="card-header">
+          <div>
+            <span class="group-tag tag-primary">Unilateral Strength</span>
+            <div class="ex-name">Bulgarian Split Squats (Dumbbells)</div>
+            <div class="ex-params">3 sets × 6–8 reps/leg</div>
+          </div>
+          <button class="preset-btn timer-trigger" data-time="90">⏱ 90s</button>
+        </div>
+        <div class="ex-notes">ℹ Forward torso lean to load lead glute. 90s rest.</div>
+        <div class="sets-container">
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
+        </div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="card-header">
+          <div>
+            <span class="group-tag tag-primary">Loaded Carry / Grip</span>
+            <div class="ex-name">Heavy Farmer's Walks / Trap Bar Carries</div>
+            <div class="ex-params">3 sets × 40 yards</div>
+          </div>
+          <button class="preset-btn timer-trigger" data-time="90">⏱ 90s</button>
+        </div>
+        <div class="ex-notes">ℹ Stand tall, brace abs, controlled steps. Deep core stabilization.</div>
+        <div class="sets-container">
+          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
+          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
+          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OFF / WALK -->
+    <div id="view-off" class="day-view">
+      <div class="rest-screen">
+        <div class="rest-icon">🚶</div>
+        <div class="rest-title">Active Recovery / Walk</div>
+        <div class="rest-p">Sleep in. 30–45 minute brisk walk to flush leg metabolites and decompress the discs before your next lifting block.</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="timer-bar">
+    <div class="timer-display">
+      <span class="timer-val" id="timerVal">00:00</span>
+      <span class="timer-label" id="timerStatus">REST TIMER</span>
+    </div>
+    <div class="timer-presets">
+      <button class="preset-btn" onclick="startTimer(30)">30s</button>
+      <button class="preset-btn" onclick="startTimer(45)">45s</button>
+      <button class="preset-btn" onclick="startTimer(60)">60s</button>
+      <button class="preset-btn" onclick="startTimer(180)">3m</button>
+      <button class="preset-btn cancel" onclick="stopTimer()">✕</button>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching using event delegation on parent container
+    document.querySelector('.day-selector').addEventListener('click', function(e) {
+      const btn = e.target.closest('.day-btn');
+      if (!btn) return;
+      
+      document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.day-view').forEach(v => v.classList.remove('active'));
+      
+      btn.classList.add('active');
+      const targetId = btn.getAttribute('data-target');
+      const targetView = document.getElementById(targetId);
+      if (targetView) targetView.classList.add('active');
+
+      const label = btn.getAttribute('data-label') || 'IronTrack';
+      const clockEl = document.getElementById('sessionTag');
+      if (clockEl) clockEl.innerText = label;
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Check button listener (event delegation on main)
+    document.querySelector('main').addEventListener('click', function(e) {
+      const checkBtn = e.target.closest('.check-btn');
+      if (checkBtn) {
+        checkBtn.classList.toggle('completed');
+        if (checkBtn.classList.contains('completed')) {
+          const rest = parseInt(checkBtn.getAttribute('data-rest') || '0', 10);
+          if (rest > 0) {
+            startTimer(rest);
+          }
+          if (navigator.vibrate) navigator.vibrate(40);
+        }
+        return;
+      }
+
+      const triggerBtn = e.target.closest('.timer-trigger');
+      if (triggerBtn) {
+        const time = parseInt(triggerBtn.getAttribute('data-time') || '60', 10);
+        startTimer(time);
+      }
+    });
+
+    // Timer Implementation
+    let timerInterval = null;
+    let timerRemaining = 0;
+
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      timerRemaining = seconds;
+      updateDisplay();
+
+      timerInterval = setInterval(() => {
+        timerRemaining--;
+        if (timerRemaining <= 0) {
+          clearInterval(timerInterval);
+          timerRemaining = 0;
+          updateDisplay();
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        } else {
+          updateDisplay();
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerRemaining = 0;
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      const mins = Math.floor(timerRemaining / 60);
+      const secs = timerRemaining % 60;
+      const formatted = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+      const valEl = document.getElementById("timerVal");
+      const statusEl = document.getElementById("timerStatus");
+      if (valEl) valEl.innerText = formatted;
+      if (statusEl) statusEl.innerText = timerRemaining > 0 ? "RESTING..." : "REST TIMER";
+    }
+
+    // Register Inline Service Worker for PWA Criteria
+    if ('serviceWorker' in navigator) {
+      const swCode = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request)); });`;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    }
+  </script>
+</body>
+</html>
