@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>IronTrack 40+ Elite</title>
-  
+
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="IronTrack">
   <meta name="theme-color" content="#0d1117">
 
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22IronTrack%2040%2B%22%2C%22short_name%22%3A%22IronTrack%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d1117%22%2C%22theme_color%22%3A%22%230d1117%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2720%27%20fill%3D%27%230d1117%27%2F%3E%3Cpath%20d%3D%27M30%2035%20h10%20v30%20h-10%20z%20M60%2035%20h10%20v30%20h-10%20z%20M40%2047%20h20%20v6%20h-20%20z%27%20fill%3D%27%2338d39f%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
   <style>
     :root {
@@ -22,6 +24,7 @@
       --text-muted: #8b949e;
       --accent: #2ea043;
       --accent-bright: #38d39f;
+      --info: #58a6ff;
       --superset-tag: #d29922;
       --danger: #f85149;
       --timer-bg: #21262d;
@@ -38,18 +41,20 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding-bottom: 95px;
-      user-select: none;
+      padding-bottom: calc(95px + env(safe-area-inset-bottom));
     }
+
+    button { font: inherit; user-select: none; -webkit-user-select: none; }
 
     header {
       position: sticky;
       top: 0;
       background: rgba(13, 17, 23, 0.95);
       backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--card-border);
       z-index: 100;
-      padding: 12px 16px;
+      padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
     }
 
     .top-row {
@@ -57,6 +62,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
+      gap: 8px;
     }
 
     .app-title {
@@ -81,11 +87,14 @@
       font-size: 0.85rem;
       color: var(--accent-bright);
       font-weight: 700;
+      font-variant-numeric: tabular-nums;
       background: var(--card-bg);
       padding: 4px 10px;
       border-radius: 20px;
       border: 1px solid var(--card-border);
+      white-space: nowrap;
     }
+    .session-clock.over { color: var(--superset-tag); border-color: var(--superset-tag); }
 
     .day-selector {
       display: flex;
@@ -106,6 +115,7 @@
       font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
+      position: relative;
     }
 
     .day-btn.active {
@@ -114,28 +124,35 @@
       border-color: var(--accent);
     }
 
+    /* Dot = workout in progress on that day */
+    .day-btn.live::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--superset-tag);
+    }
+
     main {
       padding: 16px;
       max-width: 600px;
       margin: 0 auto;
     }
 
-    .day-view {
-      display: none;
-    }
-
-    .day-view.active {
-      display: block;
-    }
-
-    .workout-meta {
-      margin-bottom: 16px;
-    }
+    .workout-meta { margin-bottom: 16px; }
 
     .workout-title {
       font-size: 1.35rem;
       font-weight: 700;
       margin-bottom: 4px;
+    }
+    .workout-title small {
+      font-size: 0.8rem;
+      color: var(--accent-bright);
+      font-weight: normal;
     }
 
     .workout-desc {
@@ -152,11 +169,13 @@
       padding: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     }
+    .exercise-card.all-done { border-color: var(--accent); }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 8px;
       margin-bottom: 8px;
     }
 
@@ -185,13 +204,28 @@
       margin-top: 3px;
     }
 
+    .ex-last {
+      font-size: 0.75rem;
+      color: var(--accent-bright);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .no-rest {
+      font-size: 0.75rem;
+      color: var(--superset-tag);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
     .ex-notes {
       font-size: 0.75rem;
-      color: #58a6ff;
+      color: var(--info);
       margin-top: 6px;
       background: rgba(56, 139, 253, 0.1);
       padding: 6px 8px;
       border-radius: 6px;
+      line-height: 1.35;
     }
 
     .sets-container {
@@ -217,31 +251,34 @@
 
     .input-wrapper {
       position: relative;
+      display: block;
     }
 
     .input-wrapper input {
       width: 100%;
-      background: #0d1117;
+      background: var(--bg);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       color: #fff;
-      font-size: 0.95rem;
+      font-size: 16px; /* 16px stops iOS from zooming on focus */
       font-weight: 700;
-      padding: 8px;
+      padding: 8px 30px 8px 8px;
       text-align: center;
       outline: none;
+      -moz-appearance: textfield;
     }
-
-    .input-wrapper input:focus {
-      border-color: #58a6ff;
-    }
+    .input-wrapper input::-webkit-outer-spin-button,
+    .input-wrapper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .input-wrapper input::placeholder { color: #484f58; }
+    .input-wrapper input:focus { border-color: var(--info); }
+    .set-row.done input { border-color: rgba(46, 160, 67, 0.5); }
 
     .input-wrapper span {
       position: absolute;
       right: 6px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: var(--text-muted);
       pointer-events: none;
     }
@@ -251,7 +288,7 @@
       height: 38px;
       border-radius: 8px;
       border: 1px solid var(--card-border);
-      background: #21262d;
+      background: var(--timer-bg);
       color: var(--text-muted);
       display: flex;
       align-items: center;
@@ -266,6 +303,35 @@
       border-color: var(--accent);
     }
 
+    .day-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .finish-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 6px;
+    }
+    .link-btn.danger { color: var(--danger); }
+
     .timer-bar {
       position: fixed;
       bottom: 0;
@@ -273,16 +339,21 @@
       right: 0;
       background: rgba(22, 27, 34, 0.98);
       border-top: 1px solid var(--card-border);
-      padding: 10px 16px;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
       z-index: 1000;
+      transition: background 0.2s;
     }
+    .timer-bar.finished { background: #1a4d2e; animation: pulse 0.5s 4 alternate; }
+    @keyframes pulse { to { background: #2ea043; } }
 
     .timer-display {
       display: flex;
       flex-direction: column;
+      min-width: 76px;
     }
 
     .timer-val {
@@ -301,18 +372,21 @@
 
     .timer-presets {
       display: flex;
-      gap: 6px;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .preset-btn {
       background: var(--timer-bg);
       border: 1px solid var(--card-border);
       color: #fff;
-      padding: 6px 10px;
+      padding: 6px 9px;
       border-radius: 8px;
       font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .preset-btn.cancel {
@@ -321,7 +395,7 @@
       color: var(--danger);
     }
 
-    .rest-screen {
+    .rest-screen, .empty {
       text-align: center;
       padding: 40px 16px;
       background: var(--card-bg);
@@ -331,6 +405,67 @@
     .rest-icon { font-size: 3rem; margin-bottom: 12px; }
     .rest-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; }
     .rest-p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+
+    /* History */
+    .h-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .h-head {
+      width: 100%;
+      background: none;
+      border: none;
+      color: inherit;
+      text-align: left;
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .h-title { font-weight: 700; font-size: 0.95rem; }
+    .h-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .h-vol { font-size: 0.8rem; color: var(--accent-bright); font-weight: 700; white-space: nowrap; }
+    .h-body { display: none; padding: 0 14px 12px; border-top: 1px solid var(--card-border); }
+    .h-item.open .h-body { display: block; }
+    .h-ex { padding-top: 10px; font-size: 0.82rem; }
+    .h-ex b { display: block; margin-bottom: 2px; }
+    .h-ex span { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+    .backup {
+      margin-top: 24px;
+      padding: 14px;
+      border: 1px dashed var(--card-border);
+      border-radius: 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .backup-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(90px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text-main);
+      color: var(--bg);
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 2000;
+      max-width: calc(100% - 32px);
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
@@ -341,568 +476,640 @@
         <span>🏋️ IRONTRACK</span>
         <span class="badge-40">40+ ELITE</span>
       </div>
-      <div class="session-clock" id="sessionTag">Day 1: 50m</div>
+      <div class="session-clock" id="sessionClock"></div>
     </div>
-    <div class="day-selector">
-      <button class="day-btn active" data-target="view-day1" data-label="Day 1: 50m">Day 1: Push</button>
-      <button class="day-btn" data-target="view-day2" data-label="Day 2: 50m">Day 2: Legs</button>
-      <button class="day-btn" data-target="view-day3" data-label="Day 3: 50m">Day 3: Pull</button>
-      <button class="day-btn" data-target="view-day4" data-label="Day 4: 70m">Day 4: Upper</button>
-      <button class="day-btn" data-target="view-day5" data-label="Day 5: 70m">Day 5: Lower</button>
-      <button class="day-btn" data-target="view-off" data-label="Off / Rest">Off / Walk</button>
-    </div>
+    <nav class="day-selector" id="daySelector"></nav>
   </header>
 
-  <main>
-    <!-- DAY 1: PUSH HYPERTROPHY -->
-    <div id="view-day1" class="day-view active">
-      <div class="workout-meta">
-        <div class="workout-title">Day 1: Push Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(50 Min Window)</span></div>
-        <div class="workout-desc">30–35m lifting + 15m warm-up or cool-down treadmill walk (0.75–1.0 mi @ 3.2 mph).</div>
-      </div>
+  <main id="main"></main>
 
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Primary Compound</span>
-            <div class="ex-name">Low-Incline DB Bench Press</div>
-            <div class="ex-params">4 sets × 8–10 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="60">⏱ 60s</button>
-        </div>
-        <div class="ex-notes">ℹ 30° incline, semi-neutral grip. Slow 3-sec negative. 60s rest between sets.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset A1</span>
-            <div class="ex-name">Cable Chest Press-Around / Flye</div>
-            <div class="ex-params">3 sets × 12 reps</div>
-          </div>
-          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → A2</span>
-        </div>
-        <div class="ex-notes">ℹ Lock at cable tower. 2-sec stretch pause. Go straight to Lateral Raises with 0s rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset A2</span>
-            <div class="ex-name">Standing Cable Lateral Raise</div>
-            <div class="ex-params">3 sets × 12–15 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
-        </div>
-        <div class="ex-notes">ℹ Constant deltoid tension. Take 45s rest only AFTER completing this exercise.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset B1</span>
-            <div class="ex-name">Seated DB Arnold Press</div>
-            <div class="ex-params">3 sets × 10–12 reps</div>
-          </div>
-          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → B2</span>
-        </div>
-        <div class="ex-notes">ℹ Smooth rotation, keep elbows under wrists. Go straight to Triceps with 0s rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset B2</span>
-            <div class="ex-name">Cross-Body Cable Triceps Extension</div>
-            <div class="ex-params">3 sets × 12–15 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
-        </div>
-        <div class="ex-notes">ℹ Spares elbow tendons completely. Take 45s rest only AFTER completing this exercise.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DAY 2: LEGS HYPERTROPHY -->
-    <div id="view-day2" class="day-view">
-      <div class="workout-meta">
-        <div class="workout-title">Day 2: Legs Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(50 Min Window)</span></div>
-        <div class="workout-desc">Zero spinal compression. Pure quad/hamstring isolation via fixed machines.</div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Primary Quad Compound</span>
-            <div class="ex-name">Hack Squat or 45° Leg Press</div>
-            <div class="ex-params">4 sets × 10–12 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="75">⏱ 75s</button>
-        </div>
-        <div class="ex-notes">ℹ 3-sec negative. Lower back flat to pad. 75s rest between working sets.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="75">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="75">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="75">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="75">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset A1</span>
-            <div class="ex-name">Seated Leg Curl</div>
-            <div class="ex-params">4 sets × 10–12 reps</div>
-          </div>
-          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → A2</span>
-        </div>
-        <div class="ex-notes">ℹ Full stretch at top. 2-sec squeeze. Go straight to Leg Extensions with 0s rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset A2</span>
-            <div class="ex-name">Leg Extension</div>
-            <div class="ex-params">4 sets × 12–15 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="60">⏱ 60s</button>
-        </div>
-        <div class="ex-notes">ℹ Point toes slightly in. Take 60s rest only AFTER completing this exercise.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset B1</span>
-            <div class="ex-name">Dumbbell Romanian Deadlift</div>
-            <div class="ex-params">3 sets × 10 reps</div>
-          </div>
-          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → B2</span>
-        </div>
-        <div class="ex-notes">ℹ Soft knees, push hips back to wall. Go straight to Calf Raises with 0s rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset B2</span>
-            <div class="ex-name">Standing DB Calf Raise</div>
-            <div class="ex-params">3 sets × 15 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
-        </div>
-        <div class="ex-notes">ℹ 2-sec dead pause at bottom stretch on every rep. Take 45s rest after completion.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DAY 3: PULL HYPERTROPHY -->
-    <div id="view-day3" class="day-view">
-      <div class="workout-meta">
-        <div class="workout-title">Day 3: Pull Hypertrophy <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(50 Min Window)</span></div>
-        <div class="workout-desc">Upper back density and arms. Zero lumbar strain to save the spine for Sunday.</div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Vertical Pull</span>
-            <div class="ex-name">Neutral-Grip Lat Pulldown</div>
-            <div class="ex-params">4 sets × 8–10 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="60">⏱ 60s</button>
-        </div>
-        <div class="ex-notes">ℹ Full lat flare at top, drive elbows straight down. 60s rest between sets.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="60">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset A1</span>
-            <div class="ex-name">Chest-Supported Incline DB Row</div>
-            <div class="ex-params">3 sets × 8–10 reps</div>
-          </div>
-          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → A2</span>
-        </div>
-        <div class="ex-notes">ℹ Chest on pad eliminates spinal shear. Go straight to Face Pulls with 0s rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset A2</span>
-            <div class="ex-name">Cable Face Pull</div>
-            <div class="ex-params">3 sets × 15 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
-        </div>
-        <div class="ex-notes">ℹ High pull with external rotation. Squeeze rear delts. Take 45s rest after completion.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset B1</span>
-            <div class="ex-name">45° Back Extension</div>
-            <div class="ex-params">3 sets × 12–15 reps</div>
-          </div>
-          <span style="font-size:0.75rem; color:var(--superset-tag); font-weight:700;">NO REST → B2</span>
-        </div>
-        <div class="ex-notes">ℹ Glute/hamstring squeeze at top. Go straight to Biceps Curls with 0s rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="0">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-superset">Superset B2</span>
-            <div class="ex-name">Incline DB Biceps Curl</div>
-            <div class="ex-params">3 sets × 10–12 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="45">⏱ 45s</button>
-        </div>
-        <div class="ex-notes">ℹ Strict 3-sec negative. Maximum bicep stretch. Take 45s rest after completion.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="45">✓</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DAY 4: UPPER STRENGTH -->
-    <div id="view-day4" class="day-view">
-      <div class="workout-meta">
-        <div class="workout-title">Day 4: Upper Strength <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(65–70 Min Runway)</span></div>
-        <div class="workout-desc">Heavy compound neural loading. 2.5–3m rest between primary working sets.</div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Primary Press</span>
-            <div class="ex-name">Barbell Incline Bench Press</div>
-            <div class="ex-params">4 sets × 4–6 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="180">⏱ 3m</button>
-        </div>
-        <div class="ex-notes">ℹ RPE 8. Keep 1–2 reps in reserve. 2.5–3m rest between sets.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Primary Row</span>
-            <div class="ex-name">Pendlay Row or Heavy Seal Row</div>
-            <div class="ex-params">4 sets × 5 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="150">⏱ 2.5m</button>
-        </div>
-        <div class="ex-notes">ℹ Dead stop off floor on every rep. Explosive concentric pull.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="150">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="150">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="150">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="150">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Vertical Press</span>
-            <div class="ex-name">Standing Barbell Overhead Press</div>
-            <div class="ex-params">3 sets × 5 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="120">⏱ 2m</button>
-        </div>
-        <div class="ex-notes">ℹ Brace glutes and abs tight. Zero lumbar hyperextension.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Vertical Pull</span>
-            <div class="ex-name">Weighted Neutral-Grip Pull-ups</div>
-            <div class="ex-params">3 sets × 6 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="120">⏱ 2m</button>
-        </div>
-        <div class="ex-notes">ℹ Strict full hang to chin clearing bar. 2m rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="120">✓</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DAY 5: LOWER STRENGTH -->
-    <div id="view-day5" class="day-view">
-      <div class="workout-meta">
-        <div class="workout-title">Day 5: Lower Strength <span style="font-size:0.8rem; color:var(--accent-bright); font-weight:normal;">(65–70 Min Runway)</span></div>
-        <div class="workout-desc">Safety squat bar and high-handle trap bar keep heavy loads centered, preserving the spine.</div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Primary Squat</span>
-            <div class="ex-name">SSB Squats or Front Squats</div>
-            <div class="ex-params">4 sets × 4–5 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="180">⏱ 3m</button>
-        </div>
-        <div class="ex-notes">ℹ SSB preserves shoulders and keeps lumbar spine vertical. 3m rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-          <div class="set-row"><div class="set-label">#4</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Primary Hinge</span>
-            <div class="ex-name">Trap Bar Deadlift (High Handle)</div>
-            <div class="ex-params">3 sets × 5 reps</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="180">⏱ 3m</button>
-        </div>
-        <div class="ex-notes">ℹ Dead stop each rep. High handles minimize spinal shear. 3m rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="180">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Unilateral Strength</span>
-            <div class="ex-name">Bulgarian Split Squats (Dumbbells)</div>
-            <div class="ex-params">3 sets × 6–8 reps/leg</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="90">⏱ 90s</button>
-        </div>
-        <div class="ex-notes">ℹ Forward torso lean to load lead glute. 90s rest.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
-        </div>
-      </div>
-
-      <div class="exercise-card">
-        <div class="card-header">
-          <div>
-            <span class="group-tag tag-primary">Loaded Carry / Grip</span>
-            <div class="ex-name">Heavy Farmer's Walks / Trap Bar Carries</div>
-            <div class="ex-params">3 sets × 40 yards</div>
-          </div>
-          <button class="preset-btn timer-trigger" data-time="90">⏱ 90s</button>
-        </div>
-        <div class="ex-notes">ℹ Stand tall, brace abs, controlled steps. Deep core stabilization.</div>
-        <div class="sets-container">
-          <div class="set-row"><div class="set-label">#1</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
-          <div class="set-row"><div class="set-label">#2</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
-          <div class="set-row"><div class="set-label">#3</div><div class="input-wrapper"><input type="number" placeholder="lbs"><span>LBS</span></div><div class="input-wrapper"><input type="number" placeholder="reps"><span>REPS</span></div><button class="check-btn" data-rest="90">✓</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- OFF / WALK -->
-    <div id="view-off" class="day-view">
-      <div class="rest-screen">
-        <div class="rest-icon">🚶</div>
-        <div class="rest-title">Active Recovery / Walk</div>
-        <div class="rest-p">Sleep in. 30–45 minute brisk walk to flush leg metabolites and decompress the discs before your next lifting block.</div>
-      </div>
-    </div>
-  </main>
-
-  <div class="timer-bar">
+  <div class="timer-bar" id="timerBar">
     <div class="timer-display">
       <span class="timer-val" id="timerVal">00:00</span>
-      <span class="timer-label" id="timerStatus">REST TIMER</span>
+      <span class="timer-label" id="timerStatus">Rest timer</span>
     </div>
     <div class="timer-presets">
-      <button class="preset-btn" onclick="startTimer(30)">30s</button>
-      <button class="preset-btn" onclick="startTimer(45)">45s</button>
-      <button class="preset-btn" onclick="startTimer(60)">60s</button>
-      <button class="preset-btn" onclick="startTimer(180)">3m</button>
-      <button class="preset-btn cancel" onclick="stopTimer()">✕</button>
+      <button class="preset-btn" data-preset="45">45s</button>
+      <button class="preset-btn" data-preset="60">60s</button>
+      <button class="preset-btn" data-preset="90">90s</button>
+      <button class="preset-btn" data-preset="180">3m</button>
+      <button class="preset-btn" data-add="15">+15</button>
+      <button class="preset-btn cancel" data-stop aria-label="Stop timer">✕</button>
     </div>
   </div>
 
+  <div class="toast" id="toast" role="status"></div>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+
   <script>
-    // Tab switching using event delegation on parent container
-    document.querySelector('.day-selector').addEventListener('click', function(e) {
-      const btn = e.target.closest('.day-btn');
-      if (!btn) return;
-      
-      document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.day-view').forEach(v => v.classList.remove('active'));
-      
-      btn.classList.add('active');
-      const targetId = btn.getAttribute('data-target');
-      const targetView = document.getElementById(targetId);
-      if (targetView) targetView.classList.add('active');
+    /* =========================================================
+       PROGRAM — edit workouts here. Everything else is built
+       from this list. Keep each exercise "id" the same once you
+       have history, or "last time" numbers won't match up.
+       ========================================================= */
+    const PROGRAM = [
+      {
+        id: 'day1', tab: 'Day 1: Push', minutes: 50,
+        title: 'Day 1: Push Hypertrophy', window: '50 Min Window',
+        desc: '30–35m lifting + 15m warm-up or cool-down treadmill walk (0.75–1.0 mi @ 3.2 mph).',
+        exercises: [
+          { id: 'incline-db-bench', tag: 'Primary Compound', name: 'Low-Incline DB Bench Press', sets: 4, reps: '8–10', rest: 60,
+            note: '30° incline, semi-neutral grip. Slow 3-sec negative. 60s rest between sets.' },
+          { id: 'cable-flye', tag: 'Superset A1', superset: true, next: 'A2', name: 'Cable Chest Press-Around / Flye', sets: 3, reps: '12', rest: 0,
+            note: 'Lock at cable tower. 2-sec stretch pause. Go straight to Lateral Raises with 0s rest.' },
+          { id: 'cable-lateral', tag: 'Superset A2', superset: true, name: 'Standing Cable Lateral Raise', sets: 3, reps: '12–15', rest: 45,
+            note: 'Constant deltoid tension. Take 45s rest only AFTER completing this exercise.' },
+          { id: 'arnold-press', tag: 'Superset B1', superset: true, next: 'B2', name: 'Seated DB Arnold Press', sets: 3, reps: '10–12', rest: 0,
+            note: 'Smooth rotation, keep elbows under wrists. Go straight to Triceps with 0s rest.' },
+          { id: 'cross-tricep', tag: 'Superset B2', superset: true, name: 'Cross-Body Cable Triceps Extension', sets: 3, reps: '12–15', rest: 45,
+            note: 'Spares elbow tendons completely. Take 45s rest only AFTER completing this exercise.' }
+        ]
+      },
+      {
+        id: 'day2', tab: 'Day 2: Legs', minutes: 50,
+        title: 'Day 2: Legs Hypertrophy', window: '50 Min Window',
+        desc: 'Zero spinal compression. Pure quad/hamstring isolation via fixed machines.',
+        exercises: [
+          { id: 'hack-squat', tag: 'Primary Quad Compound', name: 'Hack Squat or 45° Leg Press', sets: 4, reps: '10–12', rest: 75,
+            note: '3-sec negative. Lower back flat to pad. 75s rest between working sets.' },
+          { id: 'seated-leg-curl', tag: 'Superset A1', superset: true, next: 'A2', name: 'Seated Leg Curl', sets: 4, reps: '10–12', rest: 0,
+            note: 'Full stretch at top. 2-sec squeeze. Go straight to Leg Extensions with 0s rest.' },
+          { id: 'leg-extension', tag: 'Superset A2', superset: true, name: 'Leg Extension', sets: 4, reps: '12–15', rest: 60,
+            note: 'Point toes slightly in. Take 60s rest only AFTER completing this exercise.' },
+          { id: 'db-rdl', tag: 'Superset B1', superset: true, next: 'B2', name: 'Dumbbell Romanian Deadlift', sets: 3, reps: '10', rest: 0,
+            note: 'Soft knees, push hips back to wall. Go straight to Calf Raises with 0s rest.' },
+          { id: 'db-calf-raise', tag: 'Superset B2', superset: true, name: 'Standing DB Calf Raise', sets: 3, reps: '15', rest: 45,
+            note: '2-sec dead pause at bottom stretch on every rep. Take 45s rest after completion.' }
+        ]
+      },
+      {
+        id: 'day3', tab: 'Day 3: Pull', minutes: 50,
+        title: 'Day 3: Pull Hypertrophy', window: '50 Min Window',
+        desc: 'Upper back density and arms. Zero lumbar strain to save the spine for Sunday.',
+        exercises: [
+          { id: 'neutral-pulldown', tag: 'Vertical Pull', name: 'Neutral-Grip Lat Pulldown', sets: 4, reps: '8–10', rest: 60,
+            note: 'Full lat flare at top, drive elbows straight down. 60s rest between sets.' },
+          { id: 'incline-db-row', tag: 'Superset A1', superset: true, next: 'A2', name: 'Chest-Supported Incline DB Row', sets: 3, reps: '8–10', rest: 0,
+            note: 'Chest on pad eliminates spinal shear. Go straight to Face Pulls with 0s rest.' },
+          { id: 'face-pull', tag: 'Superset A2', superset: true, name: 'Cable Face Pull', sets: 3, reps: '15', rest: 45,
+            note: 'High pull with external rotation. Squeeze rear delts. Take 45s rest after completion.' },
+          { id: 'back-extension', tag: 'Superset B1', superset: true, next: 'B2', name: '45° Back Extension', sets: 3, reps: '12–15', rest: 0,
+            note: 'Glute/hamstring squeeze at top. Go straight to Biceps Curls with 0s rest.' },
+          { id: 'incline-curl', tag: 'Superset B2', superset: true, name: 'Incline DB Biceps Curl', sets: 3, reps: '10–12', rest: 45,
+            note: 'Strict 3-sec negative. Maximum bicep stretch. Take 45s rest after completion.' }
+        ]
+      },
+      {
+        id: 'day4', tab: 'Day 4: Upper', minutes: 70,
+        title: 'Day 4: Upper Strength', window: '65–70 Min Runway',
+        desc: 'Heavy compound neural loading. 2.5–3m rest between primary working sets.',
+        exercises: [
+          { id: 'bb-incline-bench', tag: 'Primary Press', name: 'Barbell Incline Bench Press', sets: 4, reps: '4–6', rest: 180,
+            note: 'RPE 8. Keep 1–2 reps in reserve. 2.5–3m rest between sets.' },
+          { id: 'pendlay-row', tag: 'Primary Row', name: 'Pendlay Row or Heavy Seal Row', sets: 4, reps: '5', rest: 150,
+            note: 'Dead stop off floor on every rep. Explosive concentric pull.' },
+          { id: 'ohp', tag: 'Vertical Press', name: 'Standing Barbell Overhead Press', sets: 3, reps: '5', rest: 120,
+            note: 'Brace glutes and abs tight. Zero lumbar hyperextension.' },
+          { id: 'weighted-pullup', tag: 'Vertical Pull', name: 'Weighted Neutral-Grip Pull-ups', sets: 3, reps: '6', rest: 120,
+            note: 'Strict full hang to chin clearing bar. 2m rest.' }
+        ]
+      },
+      {
+        id: 'day5', tab: 'Day 5: Lower', minutes: 70,
+        title: 'Day 5: Lower Strength', window: '65–70 Min Runway',
+        desc: 'Safety squat bar and high-handle trap bar keep heavy loads centered, preserving the spine.',
+        exercises: [
+          { id: 'ssb-squat', tag: 'Primary Squat', name: 'SSB Squats or Front Squats', sets: 4, reps: '4–5', rest: 180,
+            note: 'SSB preserves shoulders and keeps lumbar spine vertical. 3m rest.' },
+          { id: 'trap-bar-dl', tag: 'Primary Hinge', name: 'Trap Bar Deadlift (High Handle)', sets: 3, reps: '5', rest: 180,
+            note: 'Dead stop each rep. High handles minimize spinal shear. 3m rest.' },
+          { id: 'bulgarian-split', tag: 'Unilateral Strength', name: 'Bulgarian Split Squats (Dumbbells)', sets: 3, reps: '6–8', repsLabel: 'reps/leg', rest: 90,
+            note: 'Forward torso lean to load lead glute. 90s rest.' },
+          { id: 'farmers-walk', tag: 'Loaded Carry / Grip', name: "Heavy Farmer's Walks / Trap Bar Carries", sets: 3, reps: '40', repsLabel: 'yards', unit: 'yds', rest: 90,
+            note: 'Stand tall, brace abs, controlled steps. Deep core stabilization.' }
+        ]
+      },
+      {
+        id: 'off', tab: 'Off / Walk', rest: true,
+        title: 'Active Recovery / Walk',
+        desc: 'Sleep in. 30–45 minute brisk walk to flush leg metabolites and decompress the discs before your next lifting block.'
+      }
+    ];
 
-      const label = btn.getAttribute('data-label') || 'IronTrack';
-      const clockEl = document.getElementById('sessionTag');
-      if (clockEl) clockEl.innerText = label;
-      
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    /* ================= Storage ================= */
+    const STORE_KEY = 'irontrack.v2';
+    const LIFT_DAYS = PROGRAM.filter(d => !d.rest);
+    const EX_INDEX = {};
+    PROGRAM.forEach(d => (d.exercises || []).forEach(ex => { EX_INDEX[ex.id] = ex; }));
 
-    // Check button listener (event delegation on main)
-    document.querySelector('main').addEventListener('click', function(e) {
-      const checkBtn = e.target.closest('.check-btn');
-      if (checkBtn) {
-        checkBtn.classList.toggle('completed');
-        if (checkBtn.classList.contains('completed')) {
-          const rest = parseInt(checkBtn.getAttribute('data-rest') || '0', 10);
-          if (rest > 0) {
-            startTimer(rest);
-          }
-          if (navigator.vibrate) navigator.vibrate(40);
+    function blankState() {
+      return { current: {}, history: [], lastDay: null, timerEnd: null };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return blankState();
+        const s = JSON.parse(raw);
+        return Object.assign(blankState(), s, {
+          current: s.current && typeof s.current === 'object' ? s.current : {},
+          history: Array.isArray(s.history) ? s.history : []
+        });
+      } catch (e) {
+        return blankState();
+      }
+    }
+
+    let state = loadState();
+    let saveWarned = false;
+
+    function save() {
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      } catch (e) {
+        if (!saveWarned) { toast("Couldn't save on this device (private mode?)"); saveWarned = true; }
+      }
+    }
+
+    // Ask the browser not to clear our data when storage is low.
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+    function dayById(id) { return PROGRAM.find(d => d.id === id); }
+    function dayData(dayId) { return state.current[dayId] || (state.current[dayId] = { startedAt: null, sets: {} }); }
+    function setData(dayId, exId, i) {
+      const d = dayData(dayId);
+      const arr = d.sets[exId] || (d.sets[exId] = []);
+      return arr[i] || (arr[i] = { w: '', r: '', done: false });
+    }
+    function inProgress(dayId) { return !!(state.current[dayId] && state.current[dayId].startedAt); }
+
+    function markStarted(dayId) {
+      const d = dayData(dayId);
+      if (!d.startedAt) {
+        d.startedAt = Date.now();
+        renderTabs();
+        updateClock();
+      }
+      requestWakeLock();
+    }
+
+    // Most recent saved session containing this exercise.
+    function lastFor(exId) {
+      for (let i = state.history.length - 1; i >= 0; i--) {
+        const h = state.history[i];
+        if (h && h.sets && Array.isArray(h.sets[exId])) return { date: h.date, sets: h.sets[exId] };
+      }
+      return null;
+    }
+
+    /* ================= Helpers ================= */
+    function esc(v) {
+      return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function fmtRest(sec) { return sec <= 90 ? sec + 's' : (sec / 60) + 'm'; }
+    function fmtClock(totalSec) {
+      totalSec = Math.max(0, Math.floor(totalSec));
+      const h = Math.floor(totalSec / 3600), m = Math.floor((totalSec % 3600) / 60), s = totalSec % 60;
+      const mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
+      return h ? h + ':' + mm + ':' + ss : mm + ':' + ss;
+    }
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      return isNaN(d) ? '' : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+    function num(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
+    function setText(s) { return (s.w !== '' && s.w != null ? s.w : '–') + '×' + (s.r !== '' && s.r != null ? s.r : '–'); }
+
+    let toastTimer;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    /* ================= Rendering ================= */
+    let activeView = pickStartView();
+
+    function pickStartView() {
+      const live = LIFT_DAYS.find(d => inProgress(d.id));
+      if (live) return live.id;
+      const idx = LIFT_DAYS.findIndex(d => d.id === state.lastDay);
+      return idx >= 0 ? LIFT_DAYS[(idx + 1) % LIFT_DAYS.length].id : LIFT_DAYS[0].id;
+    }
+
+    function renderTabs() {
+      const tabs = PROGRAM.map(d =>
+        `<button class="day-btn${d.id === activeView ? ' active' : ''}${inProgress(d.id) ? ' live' : ''}" data-view="${d.id}">${esc(d.tab)}</button>`
+      );
+      tabs.push(`<button class="day-btn${activeView === 'history' ? ' active' : ''}" data-view="history">📈 History</button>`);
+      document.getElementById('daySelector').innerHTML = tabs.join('');
+      const act = document.querySelector('.day-btn.active');
+      if (act && act.scrollIntoView) act.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+
+    function renderMain() {
+      const main = document.getElementById('main');
+      if (activeView === 'history') { main.innerHTML = renderHistory(); return; }
+      const day = dayById(activeView);
+      main.innerHTML = day.rest ? renderRestDay(day) : renderDay(day);
+    }
+
+    function renderAll() { renderTabs(); renderMain(); updateClock(); }
+
+    function renderRestDay(day) {
+      return `<div class="rest-screen">
+        <div class="rest-icon">🚶</div>
+        <div class="rest-title">${esc(day.title)}</div>
+        <div class="rest-p">${esc(day.desc)}</div>
+      </div>`;
+    }
+
+    function renderDay(day) {
+      const cur = state.current[day.id];
+      const cards = day.exercises.map(ex => {
+        const last = lastFor(ex.id);
+        const unit = ex.unit || 'reps';
+        const saved = (cur && cur.sets[ex.id]) || [];
+        const allDone = saved.length >= ex.sets && saved.slice(0, ex.sets).every(s => s && s.done);
+
+        const rows = Array.from({ length: ex.sets }, (_, i) => {
+          const s = saved[i] || {};
+          const l = last && last.sets[i] ? last.sets[i] : {};
+          return `<div class="set-row${s.done ? ' done' : ''}" data-ex="${ex.id}" data-i="${i}">
+            <div class="set-label">#${i + 1}</div>
+            <label class="input-wrapper"><input type="number" inputmode="decimal" step="any" min="0" data-f="w"
+              value="${esc(s.w)}" placeholder="${esc(l.w)}" aria-label="${esc(ex.name)} set ${i + 1} weight"><span>LBS</span></label>
+            <label class="input-wrapper"><input type="number" inputmode="numeric" min="0" data-f="r"
+              value="${esc(s.r)}" placeholder="${esc(l.r)}" aria-label="${esc(ex.name)} set ${i + 1} ${unit}"><span>${unit.toUpperCase()}</span></label>
+            <button class="check-btn${s.done ? ' completed' : ''}" aria-pressed="${!!s.done}" aria-label="Mark set ${i + 1} done">✓</button>
+          </div>`;
+        }).join('');
+
+        let lastLine = '';
+        if (last) {
+          const parts = last.sets.filter(s => s && (s.w !== '' || s.r !== '')).map(setText);
+          if (parts.length) lastLine = `<div class="ex-last">Last · ${esc(fmtDate(last.date))}: ${esc(parts.join(', '))}</div>`;
         }
-        return;
-      }
 
-      const triggerBtn = e.target.closest('.timer-trigger');
-      if (triggerBtn) {
-        const time = parseInt(triggerBtn.getAttribute('data-time') || '60', 10);
-        startTimer(time);
-      }
-    });
+        const side = ex.rest > 0
+          ? `<button class="preset-btn timer-trigger" data-time="${ex.rest}">⏱ ${fmtRest(ex.rest)}</button>`
+          : `<span class="no-rest">NO REST → ${esc(ex.next || '')}</span>`;
 
-    // Timer Implementation
-    let timerInterval = null;
-    let timerRemaining = 0;
+        return `<div class="exercise-card${allDone ? ' all-done' : ''}">
+          <div class="card-header">
+            <div>
+              <span class="group-tag ${ex.superset ? 'tag-superset' : 'tag-primary'}">${esc(ex.tag)}</span>
+              <div class="ex-name">${esc(ex.name)}</div>
+              <div class="ex-params">${ex.sets} sets × ${esc(ex.reps)} ${esc(ex.repsLabel || 'reps')}</div>
+              ${lastLine}
+            </div>
+            ${side}
+          </div>
+          <div class="ex-notes">ℹ ${esc(ex.note)}</div>
+          <div class="sets-container">${rows}</div>
+        </div>`;
+      }).join('');
+
+      return `<div class="workout-meta">
+          <div class="workout-title">${esc(day.title)} <small>(${esc(day.window)})</small></div>
+          <div class="workout-desc">${esc(day.desc)}</div>
+        </div>
+        ${cards}
+        <div class="day-actions">
+          <button class="finish-btn" data-action="finish">✓ Finish &amp; Save Workout</button>
+          <button class="link-btn danger" data-action="discard">Clear today's entries</button>
+        </div>`;
+    }
+
+    function sessionVolume(h) {
+      let vol = 0, count = 0;
+      Object.keys(h.sets || {}).forEach(exId => {
+        const ex = EX_INDEX[exId];
+        (h.sets[exId] || []).forEach(s => {
+          if (!s) return;
+          count++;
+          if (!ex || ex.unit !== 'yds') vol += num(s.w) * num(s.r);
+        });
+      });
+      return { vol, count };
+    }
+
+    function renderHistory() {
+      const items = state.history.slice().reverse();
+      const list = items.length ? items.map(h => {
+        const day = dayById(h.dayId);
+        const { vol, count } = sessionVolume(h);
+        const mins = h.start && h.end ? Math.round((h.end - h.start) / 60000) : null;
+        const details = Object.keys(h.sets || {}).map(exId => {
+          const ex = EX_INDEX[exId];
+          const parts = (h.sets[exId] || []).filter(Boolean).map(setText).join(', ');
+          return `<div class="h-ex"><b>${esc(ex ? ex.name : exId)}</b><span>${esc(parts)}</span></div>`;
+        }).join('');
+        return `<div class="h-item" data-id="${esc(h.id)}">
+          <button class="h-head" data-action="toggle">
+            <div>
+              <div class="h-title">${esc(day ? day.title : h.dayId)}</div>
+              <div class="h-sub">${esc(fmtDate(h.date))}${mins != null ? ' · ' + mins + ' min' : ''} · ${count} sets</div>
+            </div>
+            <div class="h-vol">${Math.round(vol).toLocaleString()} lbs</div>
+          </button>
+          <div class="h-body">
+            ${details}
+            <button class="link-btn danger" data-action="delete">Delete this workout</button>
+          </div>
+        </div>`;
+      }).join('') : `<div class="empty"><div class="rest-icon">📈</div><div class="rest-title">No workouts yet</div>
+        <div class="rest-p">Log your sets, then tap “Finish &amp; Save Workout”. Your history and last-time numbers show up here.</div></div>`;
+
+      return `<div class="workout-meta">
+          <div class="workout-title">History</div>
+          <div class="workout-desc">${state.history.length} saved workouts. Total lbs = weight × reps for every set.</div>
+        </div>
+        ${list}
+        <div class="backup">
+          Your data is stored only on this phone, in this browser. Export a backup now and then so you don't lose it.
+          <div class="backup-row">
+            <button class="preset-btn" data-action="export">⬇ Export backup</button>
+            <button class="preset-btn" data-action="import">⬆ Import backup</button>
+          </div>
+        </div>`;
+    }
+
+    /* ================= Session clock ================= */
+    function updateClock() {
+      const el = document.getElementById('sessionClock');
+      el.classList.remove('over');
+      if (activeView === 'history') { el.textContent = 'History'; return; }
+      const day = dayById(activeView);
+      if (day.rest) { el.textContent = 'Off / Rest'; return; }
+      const cur = state.current[day.id];
+      if (cur && cur.startedAt) {
+        const sec = (Date.now() - cur.startedAt) / 1000;
+        el.textContent = '⏱ ' + fmtClock(sec) + ' / ' + day.minutes + 'm';
+        if (sec > day.minutes * 60) el.classList.add('over');
+      } else {
+        el.textContent = day.minutes + ' min session';
+      }
+    }
+    setInterval(updateClock, 1000);
+
+    /* ================= Rest timer =================
+       Stores the END time, so it stays correct even if the phone
+       locks or the page reloads. */
+    let timerTick = null;
+    let audioCtx = null;
+
+    function unlockAudio() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (e) {}
+    }
+    document.addEventListener('pointerdown', unlockAudio);
+
+    function beep() {
+      if (!audioCtx) return;
+      try {
+        const t = audioCtx.currentTime;
+        [0, 0.3, 0.6].forEach(o => {
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.frequency.value = 880;
+          g.gain.setValueAtTime(0.0001, t + o);
+          g.gain.exponentialRampToValueAtTime(0.5, t + o + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + o + 0.22);
+          osc.connect(g); g.connect(audioCtx.destination);
+          osc.start(t + o); osc.stop(t + o + 0.25);
+        });
+      } catch (e) {}
+    }
 
     function startTimer(seconds) {
-      clearInterval(timerInterval);
-      timerRemaining = seconds;
-      updateDisplay();
+      state.timerEnd = Date.now() + seconds * 1000;
+      save();
+      document.getElementById('timerBar').classList.remove('finished');
+      runTimer();
+    }
 
-      timerInterval = setInterval(() => {
-        timerRemaining--;
-        if (timerRemaining <= 0) {
-          clearInterval(timerInterval);
-          timerRemaining = 0;
-          updateDisplay();
-          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        } else {
-          updateDisplay();
-        }
-      }, 1000);
+    function addTime(seconds) {
+      if (state.timerEnd && state.timerEnd > Date.now()) { state.timerEnd += seconds * 1000; save(); tickTimer(); }
+      else startTimer(seconds);
     }
 
     function stopTimer() {
-      clearInterval(timerInterval);
-      timerRemaining = 0;
-      updateDisplay();
+      state.timerEnd = null;
+      save();
+      clearInterval(timerTick);
+      timerTick = null;
+      document.getElementById('timerBar').classList.remove('finished');
+      showTimer(0, false);
     }
 
-    function updateDisplay() {
-      const mins = Math.floor(timerRemaining / 60);
-      const secs = timerRemaining % 60;
-      const formatted = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-      const valEl = document.getElementById("timerVal");
-      const statusEl = document.getElementById("timerStatus");
-      if (valEl) valEl.innerText = formatted;
-      if (statusEl) statusEl.innerText = timerRemaining > 0 ? "RESTING..." : "REST TIMER";
+    function runTimer() {
+      clearInterval(timerTick);
+      timerTick = setInterval(tickTimer, 250);
+      tickTimer();
     }
 
-    // Register Inline Service Worker for PWA Criteria
-    if ('serviceWorker' in navigator) {
-      const swCode = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request)); });`;
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    function tickTimer() {
+      if (!state.timerEnd) return;
+      const left = Math.ceil((state.timerEnd - Date.now()) / 1000);
+      if (left > 0) { showTimer(left, true); return; }
+      // Finished
+      const lateBy = Date.now() - state.timerEnd;
+      state.timerEnd = null;
+      save();
+      clearInterval(timerTick);
+      timerTick = null;
+      showTimer(0, false, lateBy < 5000 ? 'GO! Next set' : 'Rest timer');
+      if (lateBy < 5000) {
+        const bar = document.getElementById('timerBar');
+        bar.classList.remove('finished'); void bar.offsetWidth; bar.classList.add('finished');
+        beep();
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      }
+    }
+
+    function showTimer(sec, running, label) {
+      document.getElementById('timerVal').textContent = fmtClock(sec);
+      document.getElementById('timerStatus').textContent = label || (running ? 'Resting…' : 'Rest timer');
+    }
+
+    /* ================= Keep screen awake during a workout ================= */
+    let wakeLock = null;
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && !wakeLock && document.visibilityState === 'visible') {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => { wakeLock = null; });
+        }
+      } catch (e) {}
+    }
+    function releaseWakeLock() { if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; } }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      tickTimer();
+      updateClock();
+      if (LIFT_DAYS.some(d => inProgress(d.id))) requestWakeLock();
+    });
+
+    /* ================= Actions ================= */
+    function finishDay(dayId) {
+      const day = dayById(dayId);
+      const cur = state.current[dayId];
+      const sets = {};
+      let count = 0;
+      if (cur) {
+        day.exercises.forEach(ex => {
+          const arr = (cur.sets[ex.id] || []).slice(0, ex.sets).map(s =>
+            s && (s.w !== '' || s.r !== '' || s.done) ? { w: s.w, r: s.r } : null);
+          if (arr.some(Boolean)) { sets[ex.id] = arr; count += arr.filter(Boolean).length; }
+        });
+      }
+      if (!count) { toast('Log at least one set first'); return; }
+      if (!confirm(`Save ${day.title} with ${count} logged sets?`)) return;
+
+      const now = Date.now();
+      state.history.push({ id: now, dayId, date: new Date(now).toISOString(), start: cur.startedAt || now, end: now, sets });
+      delete state.current[dayId];
+      state.lastDay = dayId;
+      save();
+      stopTimer();
+      if (!LIFT_DAYS.some(d => inProgress(d.id))) releaseWakeLock();
+      renderAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      toast('Workout saved 💪');
+    }
+
+    function discardDay(dayId) {
+      if (!state.current[dayId]) { toast('Nothing to clear'); return; }
+      if (!confirm("Clear everything you've entered today for this workout?")) return;
+      delete state.current[dayId];
+      save();
+      renderAll();
+    }
+
+    function exportBackup() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'irontrack-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    }
+
+    document.getElementById('importFile').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!data || !Array.isArray(data.history)) throw new Error('bad file');
+          if (!confirm(`Replace your current data with this backup (${data.history.length} workouts)?`)) return;
+          state = Object.assign(blankState(), data, { current: data.current && typeof data.current === 'object' ? data.current : {} });
+          save();
+          renderAll();
+          toast('Backup restored');
+        } catch (err) {
+          toast("That file isn't an IronTrack backup");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    /* ================= Events ================= */
+    document.getElementById('daySelector').addEventListener('click', e => {
+      const btn = e.target.closest('.day-btn');
+      if (!btn) return;
+      activeView = btn.dataset.view;
+      renderAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    const mainEl = document.getElementById('main');
+
+    mainEl.addEventListener('input', e => {
+      const input = e.target.closest('input[data-f]');
+      if (!input) return;
+      const row = input.closest('.set-row');
+      const s = setData(activeView, row.dataset.ex, +row.dataset.i);
+      s[input.dataset.f] = input.value;
+      markStarted(activeView);
+      save();
+    });
+
+    mainEl.addEventListener('click', e => {
+      const check = e.target.closest('.check-btn');
+      if (check) {
+        const row = check.closest('.set-row');
+        const exId = row.dataset.ex;
+        const s = setData(activeView, exId, +row.dataset.i);
+        s.done = !s.done;
+
+        if (s.done) {
+          // Empty boxes? Fill them with last time's numbers.
+          row.querySelectorAll('input[data-f]').forEach(inp => {
+            if (inp.value === '' && inp.placeholder !== '') { inp.value = inp.placeholder; s[inp.dataset.f] = inp.placeholder; }
+          });
+          const rest = EX_INDEX[exId].rest;
+          if (rest > 0) startTimer(rest);
+          if (navigator.vibrate) navigator.vibrate(40);
+          markStarted(activeView);
+        }
+        check.classList.toggle('completed', s.done);
+        check.setAttribute('aria-pressed', s.done);
+        row.classList.toggle('done', s.done);
+        const card = row.closest('.exercise-card');
+        card.classList.toggle('all-done', [...card.querySelectorAll('.check-btn')].every(b => b.classList.contains('completed')));
+        save();
+        return;
+      }
+
+      const trigger = e.target.closest('.timer-trigger');
+      if (trigger) { startTimer(+trigger.dataset.time); return; }
+
+      const actionBtn = e.target.closest('[data-action]');
+      if (!actionBtn) return;
+      const action = actionBtn.dataset.action;
+      if (action === 'finish') finishDay(activeView);
+      else if (action === 'discard') discardDay(activeView);
+      else if (action === 'export') exportBackup();
+      else if (action === 'import') document.getElementById('importFile').click();
+      else if (action === 'toggle') actionBtn.closest('.h-item').classList.toggle('open');
+      else if (action === 'delete') {
+        const id = actionBtn.closest('.h-item').dataset.id;
+        if (!confirm('Delete this workout from history? This cannot be undone.')) return;
+        state.history = state.history.filter(h => String(h.id) !== id);
+        save();
+        renderMain();
+        toast('Workout deleted');
+      }
+    });
+
+    document.querySelector('.timer-presets').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.preset) startTimer(+b.dataset.preset);
+      else if (b.dataset.add) addTime(+b.dataset.add);
+      else if ('stop' in b.dataset) stopTimer();
+    });
+
+    /* ================= Start ================= */
+    renderAll();
+    if (state.timerEnd) {
+      if (state.timerEnd > Date.now()) runTimer();
+      else { state.timerEnd = null; save(); }
+    }
+
+    // Offline support (works when served from GitHub Pages / any web server).
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
     }
   </script>
 </body>
